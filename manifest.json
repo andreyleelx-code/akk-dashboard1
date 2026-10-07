@@ -1,0 +1,16 @@
+{
+  "name": "Задачи и визитница АКК",
+  "short_name": "АКК Дашборд",
+  "description": "Рабочий дашборд Ассоциации корейцев Казахстана — задачи сотрудников и визитница",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16213E",
+  "theme_color": "#16213E",
+  "lang": "ru",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

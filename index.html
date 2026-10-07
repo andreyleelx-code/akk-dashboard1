@@ -1,0 +1,2228 @@
+<title>Задачи и контакты АКК</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- "Add to Home Screen" support: a manifest + touch icons let a phone pin this
+     page as a standalone, full-screen app icon (Android reads the manifest,
+     iOS reads the apple-touch-icon/meta tags — belt and suspenders). -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16213E">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="АКК">
+<style>
+  /* Layout concept: one shared office binder — a tab for each person's own
+     calendar/tasks, a summary tab that reads like a status board, and a
+     card-index tab (the visitnitsa) at the end. */
+  :root{
+    /* Palette matched to the АКК press-monitoring dashboard (navy + blue accent) so both tools read as one brand. */
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#ECEEF2;
+    --ink:#14192B; --ink-dim:#59617A; --line:#DDE1E8;
+    --navy:#16213E; --navy-ink:#0D1428;
+    --accent:#2A78D6; --accent-ink:#FFFFFF;
+    --good:#0CA30C; --good-bg:#E2F6E2;
+    --warn:#B8790A; --warn-bg:#FDF1D9;
+    --gold:#C9A14A;
+    --shadow-1:0 1px 2px rgba(20,25,43,.05), 0 2px 8px rgba(20,25,43,.06);
+    --shadow-2:0 2px 4px rgba(20,25,43,.07), 0 6px 18px rgba(20,25,43,.09);
+    --font-ui:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14161C; --surface:#1B1E26; --surface-2:#23272F;
+      --ink:#F2F3F6; --ink-dim:#AAB0C0; --line:#323744;
+      --navy:#1D2B4F; --navy-ink:#101A33;
+      --accent:#5B9CE8; --accent-ink:#0D1428;
+      --good:#3FC93F; --good-bg:#17301A;
+      --warn:#F0B23A; --warn-bg:#3A2F14;
+      --gold:#D9B968;
+      --shadow-1:0 1px 2px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,.28);
+      --shadow-2:0 2px 6px rgba(0,0,0,.3), 0 8px 22px rgba(0,0,0,.34);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14161C; --surface:#1B1E26; --surface-2:#23272F;
+    --ink:#F2F3F6; --ink-dim:#AAB0C0; --line:#323744;
+    --navy:#1D2B4F; --navy-ink:#101A33;
+    --accent:#5B9CE8; --accent-ink:#0D1428;
+    --good:#3FC93F; --good-bg:#17301A;
+    --warn:#F0B23A; --warn-bg:#3A2F14;
+    --gold:#D9B968;
+    --shadow-1:0 1px 2px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,.28);
+    --shadow-2:0 2px 6px rgba(0,0,0,.3), 0 8px 22px rgba(0,0,0,.34);
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-ui); font-size:14px; line-height:1.4;
+    padding-inline:12px; padding-block:0;
+    display:flex; flex-direction:column;
+  }
+  .tabular{font-variant-numeric:tabular-nums;}
+  [hidden]{display:none!important;}
+  button{font:inherit;}
+
+  header.top{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:6;
+    background:var(--bg); padding-block:0 0; display:flex; flex-direction:column; gap:7px;
+  }
+  /* Letterhead brand band — full-bleed navy card with gold hairlines, echoing the
+     org's own printed card (emblem centered, name centered, gold rules top/bottom). */
+  .brand-row{
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;
+    width:calc(100% + 24px); margin-inline:-12px;
+    padding:14px 14px 11px;
+    background:linear-gradient(170deg,var(--navy),var(--navy-ink));
+    border-top:3px solid var(--gold); border-bottom:2px solid var(--gold);
+    box-shadow:0 4px 14px rgba(13,20,40,.22);
+  }
+  .brand-logo{
+    flex:none; width:46px; height:46px; border-radius:50%;
+    background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.28);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    margin-bottom:2px;
+  }
+  .brand-logo img{width:100%; height:100%; object-fit:contain; display:block; padding:3px; box-sizing:border-box;}
+  h1{margin:0; font-size:16px; font-weight:700; letter-spacing:.01em; color:#fff; line-height:1.3;}
+  .brand-sub{display:block; font-size:11px; font-weight:600; letter-spacing:.03em; color:var(--gold); text-transform:uppercase;}
+
+  /* Hero cover for the summary tab — a park scene echoing the org's own card. */
+  .hero-cover{position:relative; width:100%; aspect-ratio:21/9; max-height:150px; border-radius:14px; overflow:hidden; background:var(--navy); border:1px solid var(--line);}
+  .hero-cover svg{position:absolute; inset:0; width:100%; height:100%; display:block;}
+  .hero-caption{margin-top:5px; font-size:11px; color:var(--ink-dim); text-align:center; font-style:italic;}
+
+  .tabbar{display:flex; flex-wrap:wrap; gap:6px; padding-bottom:4px;}
+  .tab-btn{
+    flex:none; border:1px solid var(--line); background:var(--surface); color:var(--ink-dim);
+    border-radius:999px; padding:6px 11px; cursor:pointer; white-space:nowrap; font-weight:500; font-size:13px;
+  }
+  .tab-btn.active{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600; box-shadow:0 2px 7px rgba(42,120,214,.35);}
+  .tab-btn.ghost-add{color:var(--ink-dim); border-style:dashed;}
+
+  main{flex:1; padding-block:4px 56px;}
+  .panel{display:flex; flex-direction:column; gap:10px;}
+
+  /* --- sub nav (per employee) --- */
+  .subnav{display:flex; gap:6px;}
+  .subnav button{
+    flex:1; border:1px solid var(--line); background:var(--surface); color:var(--ink-dim);
+    border-radius:9px; padding:8px 6px; cursor:pointer; font-weight:500; font-size:13px;
+  }
+  .subnav button.active{background:var(--surface-2); color:var(--ink); font-weight:700; border-color:var(--ink-dim);}
+  .emp-head{display:flex; justify-content:space-between; align-items:baseline;}
+  .emp-head h2{margin:0; font-size:16px; font-weight:700;}
+  .emp-head .pos{color:var(--ink-dim); font-size:12.5px;}
+
+  /* --- cards / rows --- */
+  .box{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 11px; box-shadow:var(--shadow-1);}
+  .task-row{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:10px 12px; cursor:pointer;
+    box-shadow:var(--shadow-1); transition:box-shadow .15s, transform .15s;
+  }
+  .task-row:active{transform:scale(.99); box-shadow:none;}
+  .task-row.done{opacity:.6;}
+  .task-dot{flex:none; width:9px; height:9px; border-radius:50%; background:var(--ink-dim);}
+  .task-dot.open{background:var(--accent);}
+  .task-dot.done{background:var(--good);}
+  .task-row .t-body{flex:1; min-width:0;}
+  .task-row .t-title{font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .task-row.done .t-title{text-decoration:line-through;}
+  .task-row .t-meta{color:var(--ink-dim); font-size:12px;}
+  .task-row .t-date{flex:none; font-family:var(--font-mono); font-size:12px; color:var(--ink-dim);}
+  .t-date.overdue{color:var(--accent); font-weight:600;}
+
+  .filters{display:flex; gap:6px;}
+  .filters button{
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-dim);
+    border-radius:8px; padding:6px 10px; cursor:pointer; font-size:12.5px;
+  }
+  .filters button.active{background:var(--surface-2); color:var(--ink); font-weight:600;}
+
+  .quickadd{display:flex; gap:8px;}
+  .quickadd input{
+    flex:1; min-width:0; font:inherit; background:var(--surface); border:1px solid var(--line);
+    border-radius:9px; padding:9px 11px; color:var(--ink); outline:none;
+  }
+  .quickadd input:focus{border-color:var(--accent);}
+  .quickadd button{
+    flex:none; background:var(--accent); color:var(--accent-ink); border:0; border-radius:9px; padding:0 14px; cursor:pointer; font-weight:600;
+  }
+
+  /* --- kanban board --- */
+  .board-wrap{display:flex; gap:9px; overflow-x:auto; padding-bottom:8px; -webkit-overflow-scrolling:touch; scroll-snap-type:x proximity;}
+  .board-col{
+    flex:none; width:76%; max-width:230px; scroll-snap-align:start;
+    background:var(--surface-2); border-radius:13px; padding:9px; border-top:3px solid var(--stage-c, var(--line));
+    display:flex; flex-direction:column; gap:7px; min-width:0;
+  }
+  @media (min-width:480px){ .board-col{width:220px;} }
+  .board-col-head{
+    display:flex; align-items:center; gap:6px;
+    font-size:11.5px; font-weight:700; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.03em; padding:0 2px;
+  }
+  .board-col-head .dot{width:7px; height:7px; border-radius:50%; background:var(--stage-c, var(--ink-dim)); flex:none;}
+  .board-col-head .lbl{flex:1;}
+  .board-col-head .cnt{background:var(--surface); border-radius:999px; padding:1px 7px; font-family:var(--font-mono); font-size:11px; color:var(--ink);}
+  .board-empty{font-size:11.5px; color:var(--ink-dim); padding:10px 2px; text-align:center;}
+  .board-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 10px;
+    text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:5px; width:100%;
+    box-shadow:var(--shadow-1); transition:box-shadow .15s, transform .15s;
+  }
+  .board-card:active{transform:scale(.99); box-shadow:none;}
+  .board-card .bc-title{font-size:13px; font-weight:600; line-height:1.3; word-break:break-word;}
+  .board-card .bc-meta{font-size:11px; color:var(--ink-dim);}
+  .board-card .bc-meta.overdue{color:var(--accent); font-weight:600;}
+  .bc-nav{display:flex; justify-content:space-between; margin-top:1px;}
+  .bc-move{border:0; background:var(--surface-2); color:var(--ink-dim); font-size:12px; padding:3px 8px; border-radius:7px; cursor:pointer;}
+  .bc-move:hover{background:var(--line); color:var(--ink);}
+
+  /* --- stage segmented control (task modal) --- */
+  .stage-seg{display:flex; gap:5px;}
+  .stage-btn{
+    flex:1; border:1px solid var(--line); background:var(--surface); color:var(--ink-dim);
+    border-radius:9px; padding:8px 4px; cursor:pointer; font-size:12px; font-weight:600; text-align:center;
+  }
+  .stage-btn.active{background:var(--stage-c, var(--navy)); border-color:var(--stage-c, var(--navy)); color:#fff; box-shadow:0 2px 7px color-mix(in srgb, var(--stage-c, var(--navy)) 45%, transparent);}
+
+  /* --- CRM block (visitnitsa contact detail) --- */
+  .stage-pill{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 10px; border-radius:999px; color:#fff; text-transform:uppercase; letter-spacing:.03em; background:var(--pill-c, var(--ink-dim));}
+  .crm-box{display:flex; flex-direction:column; gap:7px; padding:10px 11px; background:var(--surface-2); border-radius:12px; margin-bottom:2px;}
+  .crm-line{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12.5px; color:var(--ink-dim);}
+  .crm-line b{color:var(--ink); font-weight:600;}
+  .crm-line.overdue b{color:var(--accent);}
+  .crm-touch-btn{border:0; background:var(--surface); color:var(--accent); font:inherit; font-size:11.5px; font-weight:600; padding:5px 9px; border-radius:7px; cursor:pointer; flex:none;}
+
+  /* --- calendar --- */
+  .cal-nav{display:flex; align-items:center; justify-content:space-between;}
+  .cal-nav button{background:var(--surface); border:1px solid var(--line); border-radius:8px; width:28px; height:28px; cursor:pointer; color:var(--ink);}
+  .cal-nav .cal-title{font-weight:700; font-size:14px; text-transform:capitalize;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
+  .cal-dow{text-align:center; font-size:10px; color:var(--ink-dim); font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
+  .cal-cell{
+    min-height:42px; border:1px solid var(--line); border-radius:8px; background:var(--surface);
+    padding:3px; display:flex; flex-direction:column; gap:1px; cursor:pointer; position:relative; min-width:0;
+  }
+  .cal-cell.outside{opacity:.35;}
+  .cal-cell.today{border-color:var(--accent); border-width:1.5px;}
+  .cal-daynum{font-size:10.5px; color:var(--ink-dim); font-family:var(--font-mono);}
+  .cal-cell.today .cal-daynum{color:var(--accent); font-weight:700;}
+  .cal-chip{
+    font-size:8.5px; background:var(--surface-2); border-radius:4px; padding:0 3px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;
+  }
+  .cal-chip.done{opacity:.55; text-decoration:line-through;}
+  .cal-note-dot{position:absolute; top:4px; right:5px; width:5px; height:5px; border-radius:50%; background:var(--warn);}
+
+  /* --- dashboard bars --- */
+  .bar-wrap{display:flex; flex-direction:column; gap:6px;}
+  .bar-label{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-dim);}
+  .bar-track{height:9px; border-radius:5px; overflow:hidden; background:var(--surface-2); display:flex;}
+  .bar-seg{height:100%;}
+  .legend{display:flex; gap:12px; font-size:11.5px; color:var(--ink-dim); flex-wrap:wrap;}
+  .legend span{display:inline-flex; align-items:center; gap:4px;}
+  .legend i{width:8px; height:8px; border-radius:2px; display:inline-block;}
+
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+  @media (max-width:360px){ .stat-row{grid-template-columns:repeat(2,1fr);} }
+  .stat-tile{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; min-width:0; box-shadow:var(--shadow-1);}
+  .stat-tile b{display:block; font-size:18px; font-family:var(--font-mono);}
+  .stat-tile span{font-size:10px; color:var(--ink-dim);}
+
+  /* --- summary tab --- */
+  .sum-row{
+    display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:10px 12px; cursor:pointer; width:100%; text-align:left;
+    box-shadow:var(--shadow-1); transition:box-shadow .15s, transform .15s;
+  }
+  .sum-row:active{transform:scale(.99); box-shadow:none;}
+  .sum-avatar{flex:none; width:30px; height:30px; border-radius:50%; background:var(--surface-2); color:var(--ink-dim); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:11.5px; overflow:hidden;}
+  .sum-avatar img{width:100%; height:100%; object-fit:cover;}
+  .sum-name{flex:0 0 96px; min-width:0;}
+  .sum-name b{display:block; font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sum-name span{font-size:11px; color:var(--ink-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;}
+  .sum-bars{flex:1; min-width:0; display:flex; flex-direction:column; gap:4px;}
+  .sum-nums{flex:none; display:flex; gap:10px; font-family:var(--font-mono); font-size:12px;}
+  .sum-nums .bad{color:var(--accent); font-weight:700;}
+
+  /* --- sheets / modals (shared) --- */
+  .sheet-overlay{position:fixed; inset:0; background:rgba(10,12,20,.5); display:flex; align-items:flex-end; justify-content:center; z-index:30;}
+  .sheet-overlay[hidden]{display:none;}
+  .sheet{width:100%; max-width:480px; max-height:92vh; overflow-y:auto; background:var(--surface); border-radius:18px 18px 0 0; padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px)); display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow-2);}
+  .sheet-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .sheet-head h2{margin:0; font-size:17px; font-weight:700; flex:1;}
+  .sheet-close{background:none; border:0; color:var(--ink-dim); cursor:pointer; padding:4px; flex:none;}
+  .field{display:flex; flex-direction:column; gap:5px;}
+  .field label{font-size:12px; color:var(--ink-dim); font-weight:500;}
+  .field input, .field textarea{font:inherit; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:9px 11px; outline:none; width:100%;}
+  .field input:focus, .field textarea:focus{border-color:var(--accent);}
+  .field textarea{resize:vertical; min-height:52px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media (max-width:360px){.grid2{grid-template-columns:1fr;}}
+  .btn{font:inherit; font-weight:600; border-radius:10px; padding:10px 16px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;}
+  .btn.primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  .btn.ghost{background:none;}
+  .btn.danger{color:var(--accent); background:none;}
+  .btn.block{width:100%;}
+  .btn.sm{padding:7px 12px; font-size:12.5px;}
+  .row2{display:flex; gap:10px;}
+
+  .choice-grid{display:flex; flex-direction:column; gap:8px;}
+  .choice-btn{display:flex; align-items:center; justify-content:center; gap:8px; padding:16px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-weight:600; cursor:pointer;}
+
+  .log-list{display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;}
+  .log-item{background:var(--surface-2); border-radius:8px; padding:7px 9px; font-size:13px;}
+  .log-item time{display:block; font-size:10.5px; color:var(--ink-dim); font-family:var(--font-mono); margin-top:2px;}
+  .log-add{display:flex; gap:8px;}
+  .log-add input{flex:1; min-width:0; font:inherit; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 9px; color:var(--ink); outline:none;}
+  .log-add button{flex:none; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:0 11px; cursor:pointer; color:var(--ink);}
+
+  .check-list{display:flex; flex-direction:column; gap:6px;}
+  .check-item{display:flex; align-items:center; gap:8px; font-size:13.5px;}
+  .check-item input[type=checkbox]{flex:none; width:17px; height:17px;}
+  .check-item.done span{text-decoration:line-through; color:var(--ink-dim);}
+
+  .day-task-mini{display:flex; align-items:center; gap:8px; background:var(--surface-2); border-radius:8px; padding:8px 10px; cursor:pointer; font-size:13px;}
+
+  /* --- visitnitsa (shared styles reused from the standalone app) --- */
+  .search{display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 12px; box-shadow:var(--shadow-1);}
+  .search svg{flex:none; opacity:.55;}
+  .search input{flex:1; min-width:0; border:0; background:transparent; color:var(--ink); font:inherit; outline:none;}
+  .search input::placeholder{color:var(--ink-dim);}
+  .contact-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; gap:12px; align-items:center; cursor:pointer; text-align:left; width:100%; font:inherit; color:inherit; box-shadow:var(--shadow-1); transition:box-shadow .15s, transform .15s, border-color .15s;}
+  .contact-card:hover{border-color:var(--accent);}
+  .contact-card:active{transform:scale(.99); box-shadow:none;}
+  .avatar{flex:none; width:42px; height:42px; border-radius:50%; background:var(--surface-2); color:var(--ink-dim); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:15px; overflow:hidden;}
+  .avatar img{width:100%; height:100%; object-fit:cover;}
+  .cc-body{flex:1; min-width:0;}
+  .cc-name{font-weight:600; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cc-meta{color:var(--ink-dim); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cc-phone{flex:none; font-family:var(--font-mono); font-size:12.5px; color:var(--ink-dim);}
+  .cc-stage-dot{flex:none; width:8px; height:8px; border-radius:50%; background:var(--stage-c, var(--ink-dim));}
+  .cc-event{display:inline-block; margin-top:3px; max-width:100%; font-size:10.5px; font-weight:600; color:var(--gold); background:rgba(201,161,74,.14); border:1px solid rgba(201,161,74,.4); border-radius:999px; padding:1px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fab{position:fixed; right:18px; bottom:calc(20px + env(safe-area-inset-bottom,0px)); width:56px; height:56px; border-radius:50%; border:0; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.25); cursor:pointer; z-index:10;}
+  .photo-pick{border:1.5px dashed var(--line); border-radius:12px; padding:14px 8px; display:flex; flex-direction:column; align-items:center; gap:7px; color:var(--ink-dim); text-align:center; cursor:pointer; position:relative; min-width:0; font-size:13px;}
+  .photo-pick input{position:absolute; inset:0; opacity:0; cursor:pointer;}
+  .photo-preview{width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--line);}
+  .photo-preview img{display:block; width:100%; max-height:220px; object-fit:cover;}
+  .status-line{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-dim); padding:8px 10px; border-radius:8px; background:var(--surface-2);}
+  .status-line.good{color:var(--good); background:var(--good-bg);}
+  .status-line.warn{color:var(--warn); background:var(--warn-bg);}
+  .spinner{width:14px; height:14px; border-radius:50%; flex:none; border:2px solid var(--line); border-top-color:var(--accent); animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .detail-photo{width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--line); margin-bottom:4px;}
+  .detail-photo img{display:block; width:100%; max-height:260px; object-fit:cover;}
+  .detail-row{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line);}
+  .detail-row:last-of-type{border-bottom:0;}
+  .detail-label{color:var(--ink-dim); font-size:12.5px; flex:none;}
+  .detail-value-wrap{display:flex; align-items:center; gap:8px; min-width:0;}
+  .detail-value{font-family:var(--font-mono); font-size:14px; text-align:right; word-break:break-word;}
+  .copy-btn{border:0; background:none; color:var(--accent); font:inherit; font-size:12px; cursor:pointer; padding:2px 4px; flex:none;}
+  .mailto-note{font-size:11.5px; color:var(--ink-dim);}
+  .event-banner{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--ink); background:linear-gradient(135deg,rgba(201,161,74,.22),rgba(201,161,74,.08)); border:1px solid var(--gold); border-radius:999px; padding:5px 12px; margin-bottom:8px;}
+  .event-chip-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .event-chip{border:1px solid var(--line); background:var(--surface-2); color:var(--ink-dim); font:inherit; font-size:11.5px; padding:4px 10px; border-radius:999px; cursor:pointer;}
+  .event-chip:hover{border-color:var(--gold); color:var(--ink);}
+
+  /* --- timeline (Хронология) --- */
+  .tl-date-head{display:flex; align-items:baseline; gap:8px; padding:0 2px; margin-top:4px;}
+  .tl-date-head b{font-size:13px; font-weight:700; color:var(--ink); white-space:nowrap;}
+  .tl-date-head span{font-size:11px; color:var(--ink-dim); text-transform:capitalize; white-space:nowrap;}
+  .tl-date-head::after{content:''; flex:1; height:1px; background:var(--line); margin-left:2px;}
+  .tl-group{display:flex; flex-direction:column; gap:7px;}
+
+  .empty{margin-top:30px; text-align:center; color:var(--ink-dim); display:flex; flex-direction:column; align-items:center; gap:10px; padding:0 20px;}
+  .empty svg{opacity:.4;}
+</style>
+
+<header class="top">
+  <div class="brand-row">
+    <div class="brand-logo" id="brandLogo"><img src="https://res.cloudinary.com/gptmnxzl/image/upload/v1791376791/akk_logo.png" alt="АКК"></div>
+    <h1>Задачи и контакты АКК</h1>
+    <span class="brand-sub">Ассоциация корейцев Казахстана</span>
+  </div>
+  <div class="tabbar" id="tabbar"></div>
+</header>
+
+<main id="main"></main>
+
+<!-- ===== Day modal (calendar day click) ===== -->
+<div class="sheet-overlay" id="dayOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="dayTitle">День</h2><button class="sheet-close" id="dayClose">Закрыть</button></div>
+    <div id="dayBody"></div>
+  </div>
+</div>
+
+<!-- ===== Task modal ===== -->
+<div class="sheet-overlay" id="taskOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="taskTitle">Задача</h2><button class="sheet-close" id="taskClose">Закрыть</button></div>
+    <div id="taskBody"></div>
+  </div>
+</div>
+
+<!-- ===== Visitnitsa add sheet ===== -->
+<div class="sheet-overlay" id="addOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Новый контакт</h2><button class="sheet-close" id="addClose">Закрыть</button></div>
+    <div id="photoStep" class="row2">
+      <label class="photo-pick" id="photoPickCamera" style="flex:1;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        <span><b style="color:var(--ink)">Сфотографировать</b></span>
+        <input type="file" accept="image/*" capture="environment" id="photoInputCamera">
+      </label>
+      <label class="photo-pick" id="photoPickGallery" style="flex:1;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-4 4-2-2-5 5"/></svg>
+        <span><b style="color:var(--ink)">Из галереи</b></span>
+        <input type="file" accept="image/*" id="photoInputGallery">
+      </label>
+    </div>
+    <div id="photoPreviewWrap" hidden><div class="photo-preview"><img id="photoPreviewImg" alt=""></div></div>
+    <div id="recognizeStatus" class="status-line" hidden></div>
+    <div id="formFields" hidden style="display:flex; flex-direction:column; gap:12px;">
+      <div class="field"><label for="fName">Имя</label><input id="fName" type="text"></div>
+      <div class="grid2">
+        <div class="field"><label for="fPosition">Должность</label><input id="fPosition" type="text"></div>
+        <div class="field"><label for="fCompany">Компания</label><input id="fCompany" type="text"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="fPhone">Телефон</label><input id="fPhone" type="text" inputmode="tel"></div>
+        <div class="field"><label for="fEmail">Email</label><input id="fEmail" type="text" inputmode="email"></div>
+      </div>
+      <div class="field"><label for="fNote">Заметка</label><textarea id="fNote" placeholder="Где познакомились, о чём договорились…"></textarea></div>
+      <div class="field">
+        <label for="fEvent">Мероприятие</label>
+        <input id="fEvent" type="text" placeholder="Форум, конференция, встреча — откуда контакт">
+        <div class="event-chip-row" id="fEventChips"></div>
+      </div>
+      <div class="field">
+        <label>Стадия отношений</label>
+        <div class="stage-seg" id="fStageSeg">
+          <button type="button" class="stage-btn" style="--stage-c:var(--ink-dim)" data-stage="new">Новый</button>
+          <button type="button" class="stage-btn" style="--stage-c:var(--accent)" data-stage="talks">Переговоры</button>
+          <button type="button" class="stage-btn" style="--stage-c:var(--good)" data-stage="partner">Партнёр</button>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="fNextStep">Следующий шаг</label><input id="fNextStep" type="text" placeholder="Напр. выслать приглашение"></div>
+        <div class="field"><label for="fNextDate">Когда напомнить</label><input id="fNextDate" type="text" placeholder="ГГГГ-ММ-ДД"></div>
+      </div>
+    </div>
+    <div class="row2">
+      <button class="btn ghost" id="retakeBtn" hidden style="flex:1">Другое фото</button>
+      <button class="btn primary" id="saveContactBtn" hidden style="flex:2">Сохранить контакт</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Visitnitsa detail sheet ===== -->
+<div class="sheet-overlay" id="detailOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="detailName">—</h2><button class="sheet-close" id="detailClose">Закрыть</button></div>
+    <div id="detailPhotoWrap" class="detail-photo" hidden><img id="detailPhotoImg" alt=""></div>
+    <div id="detailCrm"></div>
+    <div id="detailRows"></div>
+    <div class="row2">
+      <button class="btn ghost" style="flex:1" id="editContactBtn">✎ Редактировать</button>
+      <button class="btn danger" style="flex:1" id="deleteContactBtn">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Who-am-I sheet (voice assistant) ===== -->
+<div class="sheet-overlay" id="whoOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Кто вы?</h2><button class="sheet-close" id="whoClose">Закрыть</button></div>
+    <p style="margin:0;font-size:12.5px;color:var(--ink-dim);">Выберите себя — так помощник поймёт, кому ставить задачи, когда вы говорите «мне».</p>
+    <div id="whoList" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</div>
+
+<!-- ===== Add employee sheet ===== -->
+<div class="sheet-overlay" id="empOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="empSheetTitle">Новый сотрудник</h2><button class="sheet-close" id="empClose">Закрыть</button></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="avatar" id="empPhotoPreview" style="width:54px;height:54px;font-size:16px;">?</div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+        <label class="btn sm ghost" style="position:relative;overflow:hidden;">📷 Камера<input type="file" accept="image/*" capture="environment" id="empPhotoCamera" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label>
+        <label class="btn sm ghost" style="position:relative;overflow:hidden;">🖼 Из галереи<input type="file" accept="image/*" id="empPhotoGallery" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label>
+      </div>
+    </div>
+    <div class="field"><label for="empName">Имя и фамилия</label><input id="empName" type="text"></div>
+    <div class="field"><label for="empPos">Должность</label><input id="empPos" type="text"></div>
+    <div class="grid2">
+      <div class="field"><label for="empPhone">Телефон</label><input id="empPhone" type="text" inputmode="tel"></div>
+      <div class="field"><label for="empEmail">Email</label><input id="empEmail" type="text" inputmode="email"></div>
+    </div>
+    <div class="field"><label for="empTg">Telegram</label><input id="empTg" type="text" placeholder="@username"></div>
+    <div class="field"><label for="empBio">О себе</label><textarea id="empBio" placeholder="Короткая заметка о роли, зоне ответственности…"></textarea></div>
+    <button class="btn primary block" id="empSave">Добавить</button>
+    <button class="btn danger block" id="empDeleteBtn" hidden>Удалить сотрудника</button>
+  </div>
+</div>
+
+
+<!-- Firebase (Firestore) compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  var FIREBASE_CONFIG = {"apiKey": "AIzaSyCBdkZrB83XPcmxY9xhPTRHT9py0KT8ExM", "authDomain": "assosiation-45784.firebaseapp.com", "projectId": "assosiation-45784", "storageBucket": "assosiation-45784.firebasestorage.app", "messagingSenderId": "1015320794110", "appId": "1:1015320794110:web:884ca6db4cb2f5ec4366af", "measurementId": "G-3GG3VJVP79"};
+  var CLOUDINARY = { cloud_name: "gptmnxzl", upload_preset: "AKK upload" };
+  var GEMINI_API_KEY = "PASTE_YOUR_GEMINI_API_KEY_HERE";
+  var GEMINI_MODEL = 'gemini-flash-latest';
+
+  firebase.initializeApp(FIREBASE_CONFIG);
+  var dbInstance = firebase.firestore();
+
+  function uploadToCloudinary(file){
+    var fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY.upload_preset);
+    return fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY.cloud_name+'/image/upload', {method:'POST', body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.error) return Promise.reject(new Error(data.error.message||'upload failed'));
+        return {id: data.secure_url, url: data.secure_url};
+      });
+  }
+
+  function fileToBase64(file){
+    return new Promise(function(resolve,reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(String(reader.result).split(',')[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function roleToGemini(r){ return r==='assistant' ? 'model' : 'user'; }
+
+  function callGemini(body){
+    return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+GEMINI_API_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+    }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, json:j}; }); })
+      .then(function(res){
+        if(!res.ok){
+          var msg = (res.json && res.json.error && res.json.error.message) || 'Gemini error';
+          var status = res.json && res.json.error && res.json.error.status;
+          var e = new Error(msg);
+          e.code = (status==='RESOURCE_EXHAUSTED') ? 'rate_limited' : 'error';
+          throw e;
+        }
+        return res.json;
+      });
+  }
+
+  function makeSample(){
+    function sampleFn(turns, opts){
+      opts = opts || {};
+      var contents = (turns||[]).map(function(t){ return {role: roleToGemini(t.role), parts:[{text:String(t.content||'')}]}; });
+      var body = {contents: contents};
+      var toolsMap = {};
+      if(opts.tools && opts.tools.length){
+        body.tools = [{functionDeclarations: opts.tools.map(function(t){
+          toolsMap[t.name] = t;
+          return {name:t.name, description:t.description||'', parameters: t.inputSchema||{type:'object',properties:{}}};
+        })}];
+      }
+      function step(iter){
+        if(iter>6) return Promise.resolve({text:'Не получилось завершить действие — попробуйте ещё раз.'});
+        return callGemini(body).then(function(json){
+          var cand = json.candidates && json.candidates[0];
+          var parts = (cand && cand.content && cand.content.parts) || [];
+          var fnCall = parts.filter(function(p){ return p.functionCall; })[0];
+          if(fnCall){
+            var tool = toolsMap[fnCall.functionCall.name];
+            body.contents.push({role:'model', parts:parts});
+            if(!tool){
+              body.contents.push({role:'user', parts:[{functionResponse:{name:fnCall.functionCall.name, response:{error:'unknown tool'}}}]});
+              return step(iter+1);
+            }
+            var result;
+            try { result = tool.execute(fnCall.functionCall.args||{}); } catch(e){ result = Promise.reject(e); }
+            return Promise.resolve(result).then(function(r){
+              body.contents.push({role:'user', parts:[{functionResponse:{name:fnCall.functionCall.name, response:{result:r===undefined?null:r}}}]});
+              return step(iter+1);
+            }).catch(function(e){
+              body.contents.push({role:'user', parts:[{functionResponse:{name:fnCall.functionCall.name, response:{error:String((e&&e.message)||e)}}}]});
+              return step(iter+1);
+            });
+          }
+          var textPart = parts.filter(function(p){return typeof p.text==='string';}).map(function(p){return p.text;}).join('\n');
+          return {text: textPart || '...'};
+        });
+      }
+      return step(0);
+    }
+    sampleFn.limits = function(){ return Promise.resolve({tools:true, images:true}); };
+    sampleFn.json = function(prompt, jopts){
+      jopts = jopts || {};
+      var parts = [{text:prompt}];
+      var filePromise = Promise.resolve();
+      if(jopts.images && jopts.images[0]){
+        filePromise = fileToBase64(jopts.images[0]).then(function(b64){
+          parts.push({inlineData:{mimeType: jopts.images[0].type||'image/jpeg', data:b64}});
+        });
+      }
+      return filePromise.then(function(){
+        var body = {contents:[{role:'user', parts:parts}], generationConfig:{responseMimeType:'application/json'}};
+        return callGemini(body);
+      }).then(function(json){
+        var cand = json.candidates && json.candidates[0];
+        var parts2 = (cand && cand.content && cand.content.parts) || [];
+        var txt = parts2.map(function(p){return p.text||'';}).join('');
+        try { return JSON.parse(txt); } catch(e){ var er = new Error('bad json from model'); er.code='bad_json'; throw er; }
+      });
+    };
+    return sampleFn;
+  }
+
+  window.claude = {
+    use: function(name){
+      if(name==='db') return Promise.resolve(dbInstance);
+      if(name==='assets') return Promise.resolve({upload: uploadToCloudinary});
+      if(name==='sample') return Promise.resolve(makeSample());
+      if(name==='user') return Promise.resolve({ id: function(){
+        try {
+          var k='akk_uid'; var v = localStorage.getItem(k);
+          if(!v){ v = 'u_'+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem(k,v); }
+          return Promise.resolve(v);
+        } catch(e){ return Promise.resolve('u_anon'); }
+      }});
+      return Promise.reject(new Error('capability not available: '+name));
+    }
+  };
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- capabilities ----------
+  var dbNs=null, assetsNs=null, sampleNs=null, userNs=null, canWrite=false;
+
+  // ---------- hero cover art (summary tab) ----------
+  // A stylised park scene in the org's own palette — inspired by the AKK card's
+  // photo+navy+gold look, drawn as vector shapes rather than a photo.
+  var HERO_SVG =
+    '<svg viewBox="0 0 630 270" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs>' +
+        '<linearGradient id="akkSky" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#86ABCF"/>' +
+          '<stop offset="55%" stop-color="#CBB796"/>' +
+          '<stop offset="100%" stop-color="#E3CBA2"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="akkHill" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#7C9A5E"/>' +
+          '<stop offset="100%" stop-color="#4F6B3C"/>' +
+        '</linearGradient>' +
+        '<filter id="akkBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>' +
+        '<filter id="akkBlurSoft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>' +
+      '</defs>' +
+      '<rect width="630" height="270" fill="url(#akkSky)"/>' +
+      '<circle cx="495" cy="95" r="46" fill="#F5E3B8" opacity=".55" filter="url(#akkBlur)"/>' +
+      '<ellipse cx="150" cy="60" rx="70" ry="14" fill="#fff" opacity=".35" filter="url(#akkBlur)"/>' +
+      '<ellipse cx="380" cy="40" rx="55" ry="11" fill="#fff" opacity=".3" filter="url(#akkBlur)"/>' +
+      '<circle cx="560" cy="210" r="50" fill="#50693C" opacity=".5" filter="url(#akkBlur)"/>' +
+      '<path d="M0,190 C120,160 200,210 320,185 C440,160 520,195 630,175 L630,270 L0,270 Z" fill="url(#akkHill)"/>' +
+      '<path d="M60,270 C140,225 160,205 260,210 C340,214 360,235 420,270" fill="none" stroke="#E4D3AE" stroke-width="10" opacity=".55" stroke-linecap="round"/>' +
+      // left willow: soft canopy mass + trunk + weeping strands on top
+      '<ellipse cx="97" cy="150" rx="58" ry="40" fill="#44602F" opacity=".8" filter="url(#akkBlurSoft)"/>' +
+      '<path d="M97,232 C94,205 92,178 97,150" fill="none" stroke="#4A3626" stroke-width="5" stroke-linecap="round"/>' +
+      '<g stroke="#2E4324" stroke-width="1.8" stroke-linecap="round" opacity=".85" fill="none">' +
+        '<path d="M97,150 C78,165 62,182 52,206"/>' +
+        '<path d="M97,148 C84,168 73,188 66,212"/>' +
+        '<path d="M97,147 C90,170 85,192 83,216"/>' +
+        '<path d="M97,147 C97,172 96,195 98,218"/>' +
+        '<path d="M97,147 C104,170 109,192 111,215"/>' +
+        '<path d="M97,148 C112,166 123,185 130,208"/>' +
+        '<path d="M97,150 C118,163 134,178 144,200"/>' +
+        '<path d="M97,152 C116,160 130,172 140,188"/>' +
+        '<path d="M97,152 C80,160 66,170 56,185"/>' +
+      '</g>' +
+      // right willow, smaller
+      '<ellipse cx="549" cy="188" rx="40" ry="28" fill="#44602F" opacity=".75" filter="url(#akkBlurSoft)"/>' +
+      '<path d="M549,250 C547,222 546,202 549,188" fill="none" stroke="#4A3626" stroke-width="4" stroke-linecap="round"/>' +
+      '<g stroke="#2E4324" stroke-width="1.5" stroke-linecap="round" opacity=".8" fill="none">' +
+        '<path d="M549,188 C535,200 525,213 519,230"/>' +
+        '<path d="M549,187 C540,201 533,215 530,232"/>' +
+        '<path d="M549,187 C549,203 549,218 550,233"/>' +
+        '<path d="M549,187 C558,201 565,214 568,230"/>' +
+        '<path d="M549,188 C563,198 573,210 579,224"/>' +
+      '</g>' +
+    '</svg>';
+
+  // ---------- state ----------
+  var employees = [];              // [{id,name,position,order}]
+  var tasksBySlug = {};            // id -> [task,...]
+  var dayNotesBySlug = {};         // id -> {iso: entries[]}
+  var subscribed = {};             // id -> true
+  var contacts = [];
+  var uiState = {};                // id -> {view, calY, calM, filter}
+  var activeTab = 'summary';
+  var dayModal = null;             // {slug, iso, mode}
+  var taskModal = null;            // {slug, id}
+  var selectedContactFile = null;
+  var editingContactId = null;
+  var contactsView = 'list';       // 'list' | 'assistant'
+  var chatHistory = [];            // [{role:'user'|'assistant', text, actions?}]
+  var chatBusy = false;
+
+  var todayISO = isoDate(new Date());
+
+  // ---------- helpers ----------
+  function pad2(n){ return n<10 ? '0'+n : ''+n; }
+  function isoDate(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+  function parseISO(s){ var p=s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function fmtHuman(iso){ if(!iso) return ''; var p=iso.split('-'); return p[2]+'.'+p[1]; }
+  function fmtAtHuman(at){
+    if(!at) return '';
+    var d = new Date(at);
+    return pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+', '+pad2(d.getHours())+':'+pad2(d.getMinutes());
+  }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function initials(name){
+    var parts = String(name||'').trim().split(/\s+/).filter(Boolean);
+    if(!parts.length) return '?';
+    return (parts[0][0] + (parts[1]?parts[1][0]:'')).toUpperCase();
+  }
+  function pluralTasks(n){
+    var n10=n%10, n100=n%100;
+    if(n10===1 && n100!==11) return 'а';
+    if(n10>=2 && n10<=4 && (n100<10||n100>=20)) return 'и';
+    return '';
+  }
+  function uiFor(slug){
+    if(!uiState[slug]) uiState[slug] = {view:'profile', calY:new Date().getFullYear(), calM:new Date().getMonth(), filter:'active'};
+    return uiState[slug];
+  }
+  function isOverdue(t){
+    if(t.status==='done') return false;
+    var d = t.type==='range' ? t.end_date : t.date;
+    return d && d < todayISO;
+  }
+  function empName(slug){ var e=employees.find(function(x){return x.id===slug;}); return e?e.name:slug; }
+  function givenName(full){
+    // Roster is "Фамилия Имя[ Отчество]" — the given name is the 2nd word; falls back to the full string.
+    var parts = String(full||'').trim().split(/\s+/);
+    return parts[1] || parts[0] || full;
+  }
+  function avatarHtml(e, sizeClass){
+    if(e && e.photo_id) return '<img src="'+esc(e.photo_id)+'" alt="">';
+    return esc(initials(e?e.name:''));
+  }
+
+  // ===================================================================
+  // TAB BAR
+  // ===================================================================
+  function renderTabbar(){
+    var bar = document.getElementById('tabbar');
+    var html = '<button class="tab-btn'+(activeTab==='summary'?' active':'')+'" data-tab="summary">Сводка</button>';
+    employees.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}).forEach(function(e){
+      html += '<button class="tab-btn'+(activeTab===e.id?' active':'')+'" data-tab="'+esc(e.id)+'" title="'+esc(e.name)+'">'+esc(givenName(e.name))+'</button>';
+    });
+    html += '<button class="tab-btn'+(activeTab==='contacts'?' active':'')+'" data-tab="contacts">Визитница</button>';
+    if(canWrite) html += '<button class="tab-btn ghost-add" id="addEmpTabBtn" title="Добавить сотрудника">+</button>';
+    bar.innerHTML = html;
+    bar.querySelectorAll('.tab-btn[data-tab]').forEach(function(b){
+      b.addEventListener('click', function(){ activeTab = b.getAttribute('data-tab'); renderAll(); });
+    });
+    var addBtn = document.getElementById('addEmpTabBtn');
+    if(addBtn) addBtn.addEventListener('click', function(){ openEmpSheet(null); });
+  }
+
+  function renderAll(){
+    renderTabbar();
+    var main = document.getElementById('main');
+    if(activeTab==='summary'){ main.innerHTML=''; main.appendChild(renderSummary()); }
+    else if(activeTab==='contacts'){ main.innerHTML=''; main.appendChild(renderContactsTab()); }
+    else { main.innerHTML=''; main.appendChild(renderEmployeeTab(activeTab)); }
+  }
+
+  // ===================================================================
+  // SUMMARY TAB
+  // ===================================================================
+  function empCounts(slug){
+    var list = tasksBySlug[slug]||[];
+    var open=0, done=0, overdue=0;
+    list.forEach(function(t){
+      if(t.status==='done') done++; else open++;
+      if(isOverdue(t)) overdue++;
+    });
+    return {open:open, done:done, overdue:overdue, total:list.length};
+  }
+
+  function renderHeroCover(){
+    var box = document.createElement('div');
+    var div = document.createElement('div');
+    div.className = 'hero-cover';
+    div.innerHTML = HERO_SVG;
+    box.appendChild(div);
+    var cap = document.createElement('div');
+    cap.className = 'hero-caption';
+    cap.textContent = 'K-Park · культурно-деловой центр АКК в Алатау';
+    box.appendChild(cap);
+    return box;
+  }
+
+  function renderSummary(){
+    var wrap = document.createElement('div');
+    wrap.className = 'panel';
+    wrap.appendChild(renderHeroCover());
+    if(!employees.length){
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'Сотрудники пока не добавлены. Нажмите «+» в строке вкладок.';
+      wrap.appendChild(empty);
+      return wrap;
+    }
+    var intro = document.createElement('p');
+    intro.style.cssText = 'margin:0;color:var(--ink-dim);font-size:12.5px;';
+    intro.textContent = 'Открыто / выполнено / просрочено — по каждому сотруднику. Нажмите на строку, чтобы открыть его дашборд.';
+    wrap.appendChild(intro);
+
+    employees.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}).forEach(function(e){
+      var c = empCounts(e.id);
+      var total = c.open + c.done;
+      var openPct = total ? Math.round(c.open/total*100) : 0;
+      var row = document.createElement('button');
+      row.className = 'sum-row';
+      row.innerHTML =
+        '<div class="sum-avatar">'+avatarHtml(e)+'</div>' +
+        '<div class="sum-name"><b>'+esc(e.name)+'</b><span>'+esc(e.position||'')+'</span></div>' +
+        '<div class="sum-bars"><div class="bar-track"><div class="bar-seg" style="width:'+openPct+'%;background:var(--accent)"></div><div class="bar-seg" style="width:'+(100-openPct)+'%;background:var(--good)"></div></div></div>' +
+        '<div class="sum-nums"><span>'+c.open+' откр.</span><span class="'+(c.overdue?'bad':'')+'">'+c.overdue+' просроч.</span></div>';
+      row.addEventListener('click', function(){ activeTab = e.id; renderAll(); });
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  // ===================================================================
+  // EMPLOYEE TAB (calendar / list / dashboard)
+  // ===================================================================
+  function renderEmployeeTab(slug){
+    var e = employees.find(function(x){return x.id===slug;});
+    var ui = uiFor(slug);
+    var wrap = document.createElement('div');
+    wrap.className = 'panel';
+    if(!e){ wrap.innerHTML = '<div class="empty">Сотрудник не найден.</div>'; return wrap; }
+
+    var head = document.createElement('div');
+    head.className = 'emp-head';
+    head.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div class="avatar" style="width:38px;height:38px;font-size:13px;">'+avatarHtml(e)+'</div>' +
+        '<div><h2>'+esc(e.name)+'</h2><span class="pos">'+esc(e.position||'')+'</span></div>' +
+      '</div>' +
+      (canWrite ? '<button class="btn sm ghost" id="empEditBtn" title="Изменить сотрудника">✎</button>' : '');
+    wrap.appendChild(head);
+    var empEditBtn = head.querySelector('#empEditBtn');
+    if(empEditBtn) empEditBtn.addEventListener('click', function(){ openEmpSheet(e); });
+
+    var subnav = document.createElement('div');
+    subnav.className = 'subnav';
+    [['profile','Профиль'],['calendar','Календарь'],['list','Список'],['board','Доска']].forEach(function(pair){
+      var b = document.createElement('button');
+      b.textContent = pair[1];
+      if(ui.view===pair[0]) b.className='active';
+      b.addEventListener('click', function(){ ui.view=pair[0]; renderAll(); });
+      subnav.appendChild(b);
+    });
+    wrap.appendChild(subnav);
+
+    if(ui.view==='calendar') wrap.appendChild(renderCalendar(slug));
+    else if(ui.view==='list') wrap.appendChild(renderList(slug));
+    else if(ui.view==='board') wrap.appendChild(renderBoard(slug));
+    else wrap.appendChild(renderProfile(slug));
+
+    return wrap;
+  }
+
+  // ===================================================================
+  // PROFILE (mini-profile per person — separate from tasks)
+  // ===================================================================
+  function renderProfile(slug){
+    var e = employees.find(function(x){return x.id===slug;});
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:14px;';
+    if(!e) return wrap;
+
+    var top = document.createElement('div');
+    top.style.cssText = 'display:flex;gap:14px;align-items:center;';
+    var photoBig = document.createElement('div');
+    photoBig.style.cssText = 'flex:none;width:84px;height:84px;border-radius:18px;overflow:hidden;background:var(--surface-2);color:var(--ink-dim);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;';
+    photoBig.innerHTML = e.photo_id ? '<img src="'+esc(e.photo_id)+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">' : esc(initials(e.name));
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0;';
+    info.innerHTML = '<div style="font-size:17px;font-weight:700;line-height:1.25;">'+esc(e.name)+'</div>' +
+      '<div style="color:var(--ink-dim);font-size:13px;margin-top:3px;">'+esc(e.position||'')+'</div>';
+    top.appendChild(photoBig); top.appendChild(info);
+    wrap.appendChild(top);
+
+    var hasContact = e.phone || e.email || e.telegram;
+    var contactBox = document.createElement('div');
+    contactBox.className = 'box';
+    if(hasContact){
+      var tgValue = e.telegram ? e.telegram.replace(/^@/,'') : '';
+      var tgHref = tgValue ? 'https://t.me/'+encodeURIComponent(tgValue) : '';
+      contactBox.innerHTML =
+        detailRow('Телефон', e.phone) +
+        detailRow('Email', e.email, true) +
+        (e.telegram ? '<div class="detail-row"><span class="detail-label">Telegram</span><span class="detail-value-wrap"><span class="detail-value">'+esc(e.telegram)+'</span><a href="'+esc(tgHref)+'" class="copy-btn" style="text-decoration:none;">открыть</a></span></div>' : '') +
+        (e.email ? '<p class="mailto-note">Ссылка «написать» открывает вашу почтовую программу — работает не в каждом браузере, адрес выше можно скопировать вручную.</p>' : '');
+    } else {
+      contactBox.innerHTML = '<div class="empty" style="padding:4px 0;">Контакты пока не заполнены'+(canWrite?' — нажмите ✎ наверху.':'.')+'</div>';
+    }
+    wrap.appendChild(contactBox);
+
+    if(e.bio){
+      var bioBox = document.createElement('div');
+      bioBox.className = 'box';
+      bioBox.innerHTML = '<div class="detail-label" style="margin-bottom:5px;">О себе</div><div style="font-size:13.5px;line-height:1.45;white-space:pre-wrap;">'+esc(e.bio)+'</div>';
+      wrap.appendChild(bioBox);
+    }
+
+    var c = empCounts(slug);
+    var statsHead = document.createElement('div');
+    statsHead.style.cssText = 'color:var(--ink-dim);font-size:12.5px;';
+    statsHead.textContent = 'Задачи';
+    wrap.appendChild(statsHead);
+    var stats = document.createElement('div');
+    stats.className = 'stat-row';
+    stats.innerHTML =
+      '<div class="stat-tile"><b>'+c.total+'</b><span>всего</span></div>' +
+      '<div class="stat-tile"><b>'+c.open+'</b><span>открыто</span></div>' +
+      '<div class="stat-tile"><b>'+c.done+'</b><span>выполнено</span></div>' +
+      '<div class="stat-tile"><b style="color:'+(c.overdue?'var(--accent)':'inherit')+'">'+c.overdue+'</b><span>просрочено</span></div>';
+    wrap.appendChild(stats);
+
+    var list = tasksBySlug[slug]||[];
+    if(list.length){
+      var total = list.length;
+      function bar(title, segs){
+        var b = document.createElement('div'); b.className='bar-wrap';
+        var track = segs.map(function(s){ return '<div class="bar-seg" style="width:'+(s.pct)+'%;background:'+s.color+'"></div>'; }).join('');
+        var legend = segs.map(function(s){ return '<span><i style="background:'+s.color+'"></i>'+s.label+' ('+s.n+')</span>'; }).join('');
+        b.innerHTML = '<div class="bar-label"><span>'+title+'</span></div><div class="bar-track">'+track+'</div><div class="legend">'+legend+'</div>';
+        return b;
+      }
+      var stageCounts = {todo:0, doing:0, done:0};
+      list.forEach(function(t){ stageCounts[stageOf(t)]++; });
+      wrap.appendChild(bar('По этапу', [
+        {pct: stageCounts.todo/total*100, color:'var(--ink-dim)', label:'новое', n:stageCounts.todo},
+        {pct: stageCounts.doing/total*100, color:'var(--accent)', label:'в работе', n:stageCounts.doing},
+        {pct: stageCounts.done/total*100, color:'var(--good)', label:'готово', n:stageCounts.done}
+      ]));
+    }
+
+    var goRow = document.createElement('div');
+    goRow.style.cssText = 'display:flex; gap:8px;';
+    var goBoard = document.createElement('button');
+    goBoard.className = 'btn sm ghost'; goBoard.style.flex = '1';
+    goBoard.textContent = 'Доска →';
+    goBoard.addEventListener('click', function(){ uiFor(slug).view = 'board'; renderAll(); });
+    var goList = document.createElement('button');
+    goList.className = 'btn sm ghost'; goList.style.flex = '1';
+    goList.textContent = 'Список →';
+    goList.addEventListener('click', function(){ uiFor(slug).view = 'list'; renderAll(); });
+    goRow.appendChild(goBoard); goRow.appendChild(goList);
+    wrap.appendChild(goRow);
+
+    return wrap;
+  }
+
+  // ===================================================================
+  // BOARD (Kanban view — Новое / В работе / Готово)
+  //   `stage` is a lightweight extra field layered on top of the existing
+  //   status:'open'|'done' so Calendar/List/Dashboard keep working unchanged.
+  //   Missing stage is inferred from status for tasks created before this.
+  // ===================================================================
+  var TASK_STAGES = [['todo','Новое'],['doing','В работе'],['done','Готово']];
+  var STAGE_COLOR = {todo:'var(--ink-dim)', doing:'var(--accent)', done:'var(--good)'};
+  function stageOf(t){
+    if(t.stage && TASK_STAGES.some(function(c){return c[0]===t.stage;})) return t.stage;
+    return t.status==='done' ? 'done' : 'todo';
+  }
+  function moveStage(slug, t, newStage){
+    if(!dbNs || !canWrite) return;
+    dbNs.doc('employees/'+slug+'/tasks/'+t.id).update({
+      stage:newStage, status: newStage==='done'?'done':'open', updated_at:new Date().toISOString()
+    });
+  }
+
+  function renderBoard(slug){
+    var ui = uiFor(slug);
+    if(!ui.boardStage || !TASK_STAGES.some(function(c){return c[0]===ui.boardStage;})) ui.boardStage = 'todo';
+    var outer = document.createElement('div');
+    var tasks = (tasksBySlug[slug]||[]).slice();
+    tasks.sort(function(a,b){ return (a.date||a.start_date||a.created_at||'').localeCompare(b.date||b.start_date||b.created_at||''); });
+
+    var hint = document.createElement('p');
+    hint.style.cssText = 'margin:0 0 9px;color:var(--ink-dim);font-size:12px;';
+    hint.textContent = 'Переключайте этап кнопками ниже. Стрелки на карточке передвигают задачу между этапами.';
+    outer.appendChild(hint);
+
+    // Stage switcher replaces side-scrolling columns — one full-width list at a time, nothing to swipe.
+    var seg = document.createElement('div');
+    seg.className = 'stage-seg';
+    TASK_STAGES.forEach(function(c){
+      var n = tasks.filter(function(t){ return stageOf(t)===c[0]; }).length;
+      var b = document.createElement('button');
+      b.className = 'stage-btn'+(ui.boardStage===c[0]?' active':'');
+      b.style.setProperty('--stage-c', STAGE_COLOR[c[0]]);
+      b.textContent = c[1]+' ('+n+')';
+      b.addEventListener('click', function(){ ui.boardStage = c[0]; renderAll(); });
+      seg.appendChild(b);
+    });
+    outer.appendChild(seg);
+
+    var ci = TASK_STAGES.findIndex(function(c){ return c[0]===ui.boardStage; });
+    var col = document.createElement('div');
+    col.className = 'board-col';
+    col.style.cssText = 'width:100%; max-width:none; margin-top:10px;';
+    col.style.setProperty('--stage-c', STAGE_COLOR[ui.boardStage]);
+    var colTasks = tasks.filter(function(t){ return stageOf(t)===ui.boardStage; });
+    if(!colTasks.length){
+      var emp = document.createElement('div'); emp.className='board-empty'; emp.style.padding='22px 2px'; emp.textContent='Пусто';
+      col.appendChild(emp);
+    }
+    colTasks.forEach(function(t){
+      var card = document.createElement('div');
+      card.className = 'board-card';
+      var dateLabel = t.type==='point' ? (t.date?fmtHuman(t.date)+(t.time?' '+t.time:''):'') :
+                      t.type==='range' ? (fmtHuman(t.start_date)+'–'+fmtHuman(t.end_date)) : '';
+      var overdue = isOverdue(t);
+      var navHtml = canWrite ? (
+        '<div class="bc-nav">' +
+          (ci>0 ? '<button class="bc-move" data-dir="-1" title="Назад">← '+esc(TASK_STAGES[ci-1][1])+'</button>' : '<span></span>') +
+          (ci<TASK_STAGES.length-1 ? '<button class="bc-move" data-dir="1" title="Дальше">'+esc(TASK_STAGES[ci+1][1])+' →</button>' : '<span></span>') +
+        '</div>'
+      ) : '';
+      card.innerHTML =
+        '<span class="bc-title">'+esc(t.title)+'</span>' +
+        '<span class="bc-meta'+(overdue?' overdue':'')+'">'+(dateLabel?esc(dateLabel):'без срока')+(t.from_person?' · '+esc(t.from_person):'')+'</span>' +
+        navHtml;
+      card.addEventListener('click', function(ev){
+        if(ev.target.closest('.bc-move')) return;
+        openTaskModal(slug, t.id);
+      });
+      card.querySelectorAll('.bc-move').forEach(function(btn){
+        btn.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          var dir = +btn.getAttribute('data-dir');
+          var dest = TASK_STAGES[ci+dir][0];
+          moveStage(slug, t, dest);
+          ui.boardStage = dest; // follow the card so it doesn't just vanish from view
+          renderAll();
+        });
+      });
+      col.appendChild(card);
+    });
+    outer.appendChild(col);
+    return outer;
+  }
+
+  var DOW = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  var MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+  function renderCalendar(slug){
+    var ui = uiFor(slug);
+    var box = document.createElement('div');
+    box.className = 'box';
+    var nav = document.createElement('div');
+    nav.className = 'cal-nav';
+    nav.innerHTML = '<button id="calPrev">‹</button><span class="cal-title">'+MONTHS[ui.calM]+' '+ui.calY+'</span><button id="calNext">›</button>';
+    box.appendChild(nav);
+    nav.querySelector('#calPrev').addEventListener('click', function(){ ui.calM--; if(ui.calM<0){ui.calM=11; ui.calY--;} renderAll(); });
+    nav.querySelector('#calNext').addEventListener('click', function(){ ui.calM++; if(ui.calM>11){ui.calM=0; ui.calY++;} renderAll(); });
+
+    var grid = document.createElement('div');
+    grid.className = 'cal-grid';
+    grid.style.marginTop = '8px';
+    DOW.forEach(function(d){ var el=document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el); });
+
+    var first = new Date(ui.calY, ui.calM, 1);
+    var startOffset = (first.getDay()+6)%7; // Monday=0
+    var startCell = new Date(ui.calY, ui.calM, 1-startOffset);
+    var tasks = tasksBySlug[slug]||[];
+    var notes = dayNotesBySlug[slug]||{};
+
+    for(var i=0;i<42;i++){
+      var d = new Date(startCell.getFullYear(), startCell.getMonth(), startCell.getDate()+i);
+      var iso = isoDate(d);
+      var cell = document.createElement('div');
+      cell.className = 'cal-cell' + (d.getMonth()!==ui.calM?' outside':'') + (iso===todayISO?' today':'');
+      var dayTasks = tasks.filter(function(t){
+        if(t.type==='point') return t.date===iso;
+        if(t.type==='range') return t.start_date<=iso && iso<=t.end_date;
+        return false;
+      });
+      var html = '<span class="cal-daynum">'+d.getDate()+'</span>';
+      dayTasks.slice(0,3).forEach(function(t){
+        html += '<div class="cal-chip'+(t.status==='done'?' done':'')+'" data-task="'+esc(t.id)+'">'+esc(t.title)+'</div>';
+      });
+      if(dayTasks.length>3) html += '<div class="cal-chip">+'+(dayTasks.length-3)+'</div>';
+      if(notes[iso] && notes[iso].length) html += '<span class="cal-note-dot"></span>';
+      cell.innerHTML = html;
+      cell.addEventListener('click', function(ev){
+        var chip = ev.target.closest('[data-task]');
+        if(chip){ ev.stopPropagation(); openTaskModal(slug, chip.getAttribute('data-task')); return; }
+      });
+      cell.addEventListener('click', (function(iso){ return function(ev){
+        if(ev.target.closest('[data-task]')) return;
+        openDayModal(slug, iso);
+      };})(iso));
+      grid.appendChild(cell);
+    }
+    box.appendChild(grid);
+    return box;
+  }
+
+  function renderList(slug){
+    var ui = uiFor(slug);
+    var wrap = document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;gap:10px;';
+
+    var filters = document.createElement('div');
+    filters.className = 'filters';
+    [['active','Активные'],['all','Все'],['done','Выполненные']].forEach(function(p){
+      var b=document.createElement('button');
+      b.textContent=p[1];
+      if(ui.filter===p[0]) b.className='active';
+      b.addEventListener('click', function(){ ui.filter=p[0]; renderAll(); });
+      filters.appendChild(b);
+    });
+    wrap.appendChild(filters);
+
+    var tasks = (tasksBySlug[slug]||[]).slice();
+    var dated = tasks.filter(function(t){ return t.type!=='ongoing'; });
+    var ongoing = tasks.filter(function(t){ return t.type==='ongoing'; });
+    dated.sort(function(a,b){ return (a.date||a.start_date||'').localeCompare(b.date||b.start_date||''); });
+
+    function applyFilter(list){
+      if(ui.filter==='active') return list.filter(function(t){return t.status!=='done';});
+      if(ui.filter==='done') return list.filter(function(t){return t.status==='done';});
+      return list;
+    }
+
+    var listEl = document.createElement('div');
+    listEl.style.cssText='display:flex;flex-direction:column;gap:7px;';
+    var shown = applyFilter(dated);
+    if(!shown.length){
+      var e1=document.createElement('div'); e1.className='empty'; e1.style.marginTop='10px';
+      e1.textContent='Нет задач по этому фильтру.'; listEl.appendChild(e1);
+    }
+    shown.forEach(function(t){ listEl.appendChild(taskRow(slug,t)); });
+    wrap.appendChild(listEl);
+
+    var ongoingShown = applyFilter(ongoing);
+    if(ongoingShown.length){
+      var h = document.createElement('div');
+      h.style.cssText='font-size:12px;color:var(--ink-dim);font-weight:600;margin-top:6px;';
+      h.textContent = 'БЕЗ СРОКА';
+      wrap.appendChild(h);
+      var ol = document.createElement('div');
+      ol.style.cssText='display:flex;flex-direction:column;gap:7px;';
+      ongoingShown.forEach(function(t){ ol.appendChild(taskRow(slug,t)); });
+      wrap.appendChild(ol);
+    }
+
+    var qa = document.createElement('div');
+    qa.className = 'quickadd';
+    qa.innerHTML = '<input type="text" placeholder="Добавить заметку-задачу без срока…" id="qaInput"><button id="qaBtn">+</button>';
+    wrap.appendChild(qa);
+    function submitQa(){
+      var inp = qa.querySelector('#qaInput');
+      var v = inp.value.trim();
+      if(!v || !dbNs || !canWrite) return;
+      dbNs.collection('employees/'+slug+'/tasks').add({
+        title:v, type:'ongoing', status:'open', date:'', time:'', start_date:'', end_date:'',
+        from_person:'', location:'', description:'', notes:'', notes_log:[], checklist:[], attachments:[],
+        created_at:new Date().toISOString(), updated_at:new Date().toISOString()
+      }).then(function(){ inp.value=''; });
+    }
+    qa.querySelector('#qaBtn').addEventListener('click', submitQa);
+    qa.querySelector('#qaInput').addEventListener('keydown', function(ev){ if(ev.key==='Enter') submitQa(); });
+
+    return wrap;
+  }
+
+  function taskRow(slug, t){
+    var row = document.createElement('button');
+    row.className = 'task-row'+(t.status==='done'?' done':'');
+    var dateLabel = t.type==='point' ? (t.date?fmtHuman(t.date)+(t.time?' '+t.time:''):'') :
+                    t.type==='range' ? (fmtHuman(t.start_date)+'–'+fmtHuman(t.end_date)) : '';
+    var overdue = isOverdue(t);
+    row.innerHTML =
+      '<span class="task-dot '+(t.status==='done'?'done':'open')+'"></span>' +
+      '<span class="t-body"><span class="t-title">'+esc(t.title)+'</span>' +
+      (t.from_person?'<span class="t-meta"> от '+esc(t.from_person)+'</span>':'') + '</span>' +
+      '<span class="t-date tabular'+(overdue?' overdue':'')+'">'+esc(dateLabel)+'</span>';
+    row.addEventListener('click', function(){ openTaskModal(slug, t.id); });
+    return row;
+  }
+
+  // ===================================================================
+  // DAY MODAL
+  // ===================================================================
+  function openDayModal(slug, iso){
+    dayModal = {slug:slug, iso:iso, mode:null};
+    renderDayModal();
+    document.getElementById('dayOverlay').hidden = false;
+  }
+  function closeDayModal(){ document.getElementById('dayOverlay').hidden = true; dayModal=null; }
+  document.getElementById('dayClose').addEventListener('click', closeDayModal);
+  document.getElementById('dayOverlay').addEventListener('click', function(e){ if(e.target===this) closeDayModal(); });
+
+  function renderDayModal(){
+    if(!dayModal) return;
+    var slug=dayModal.slug, iso=dayModal.iso;
+    document.getElementById('dayTitle').textContent = fmtHuman(iso)+'.'+iso.slice(0,4)+' · '+empName(slug);
+    var body = document.getElementById('dayBody');
+    var tasks = (tasksBySlug[slug]||[]).filter(function(t){
+      if(t.type==='point') return t.date===iso;
+      if(t.type==='range') return t.start_date<=iso && iso<=t.end_date;
+      return false;
+    });
+    var noteEntries = ((dayNotesBySlug[slug]||{})[iso]) || [];
+
+    if(dayModal.mode===null){
+      var html = '';
+      if(tasks.length || noteEntries.length){
+        html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+        tasks.forEach(function(t){
+          html += '<div class="day-task-mini" data-task="'+esc(t.id)+'"><span class="task-dot '+(t.status==='done'?'done':'open')+'"></span>'+esc(t.title)+'</div>';
+        });
+        noteEntries.forEach(function(n){
+          html += '<div class="log-item">'+esc(n.text)+'<time>'+fmtAtHuman(n.at)+'</time></div>';
+        });
+        html += '</div>';
+      }
+      html += '<div class="choice-grid" style="margin-top:12px;">' +
+        '<button class="choice-btn" id="toNote">📝 Добавить заметку</button>' +
+        '<button class="choice-btn" id="toTask">✓ Добавить задачу</button></div>';
+      body.innerHTML = html;
+      body.querySelectorAll('[data-task]').forEach(function(el){
+        el.addEventListener('click', function(){ closeDayModal(); openTaskModal(slug, el.getAttribute('data-task')); });
+      });
+      var tb = body.querySelector('#toTask'), nb = body.querySelector('#toNote');
+      if(tb) tb.addEventListener('click', function(){ dayModal.mode='task'; renderDayModal(); });
+      if(nb) nb.addEventListener('click', function(){ dayModal.mode='note'; renderDayModal(); });
+      return;
+    }
+
+    if(dayModal.mode==='note'){
+      var h = '<p style="margin:0 0 4px;"><a href="#" id="backChoice" style="color:var(--ink-dim);text-decoration:none;">‹ назад</a></p>';
+      h += '<div class="log-list">' + noteEntries.map(function(n){ return '<div class="log-item">'+esc(n.text)+'<time>'+fmtAtHuman(n.at)+'</time></div>'; }).join('') + '</div>';
+      h += '<div class="log-add"><input type="text" id="noteInput" placeholder="Мысль на этот день…"><button id="noteAddBtn">+</button></div>';
+      body.innerHTML = h;
+      body.querySelector('#backChoice').addEventListener('click', function(e){ e.preventDefault(); dayModal.mode=null; renderDayModal(); });
+      function submitNote(){
+        var inp = body.querySelector('#noteInput');
+        var v = inp.value.trim();
+        if(!v || !dbNs || !canWrite) return;
+        var ref = dbNs.doc('employees/'+slug+'/day_notes/'+iso);
+        var entries = noteEntries.concat([{text:v, at:new Date().toISOString()}]);
+        ref.set({entries:entries}).then(function(){ inp.value=''; });
+      }
+      body.querySelector('#noteAddBtn').addEventListener('click', submitNote);
+      body.querySelector('#noteInput').addEventListener('keydown', function(ev){ if(ev.key==='Enter') submitNote(); });
+      return;
+    }
+
+    if(dayModal.mode==='task'){
+      var h2 = '<p style="margin:0 0 4px;"><a href="#" id="backChoice2" style="color:var(--ink-dim);text-decoration:none;">‹ назад</a></p>';
+      h2 += '<div class="field"><label>Название</label><input type="text" id="qtTitle"></div>';
+      h2 += '<div class="field"><label>Время (необязательно)</label><input type="text" id="qtTime" placeholder="напр. 15:00"></div>';
+      h2 += '<button class="btn primary block" id="qtSave" style="margin-top:4px;">Добавить задачу на '+fmtHuman(iso)+'</button>';
+      body.innerHTML = h2;
+      body.querySelector('#backChoice2').addEventListener('click', function(e){ e.preventDefault(); dayModal.mode=null; renderDayModal(); });
+      body.querySelector('#qtSave').addEventListener('click', function(){
+        var title = body.querySelector('#qtTitle').value.trim();
+        if(!title || !dbNs || !canWrite) return;
+        dbNs.collection('employees/'+slug+'/tasks').add({
+          title:title, type:'point', status:'open', date:iso, time:body.querySelector('#qtTime').value.trim(),
+          start_date:'', end_date:'', from_person:'', location:'', description:'', notes:'', notes_log:[],
+          checklist:[], attachments:[], created_at:new Date().toISOString(), updated_at:new Date().toISOString()
+        }).then(closeDayModal);
+      });
+      return;
+    }
+  }
+
+  // ===================================================================
+  // TASK MODAL
+  // ===================================================================
+  var taskEditMode = false;
+  function openTaskModal(slug, id){
+    taskModal = {slug:slug, id:id};
+    taskEditMode = false;
+    renderTaskModal();
+    document.getElementById('taskOverlay').hidden = false;
+  }
+  function closeTaskModal(){ document.getElementById('taskOverlay').hidden = true; taskModal = null; taskEditMode = false; }
+  document.getElementById('taskClose').addEventListener('click', closeTaskModal);
+  document.getElementById('taskOverlay').addEventListener('click', function(e){ if(e.target===this) closeTaskModal(); });
+
+  function renderTaskModal(){
+    if(!taskModal) return;
+    var slug=taskModal.slug, id=taskModal.id;
+    var t = (tasksBySlug[slug]||[]).find(function(x){return x.id===id;});
+    if(!t){ closeTaskModal(); return; }
+    var ref = dbNs ? dbNs.doc('employees/'+slug+'/tasks/'+id) : null;
+
+    if(taskEditMode){
+      document.getElementById('taskTitle').textContent = 'Изменить задачу';
+      renderTaskEditForm(t, ref);
+      return;
+    }
+    document.getElementById('taskTitle').textContent = t.title;
+
+    var dateLabel = t.type==='point' ? (t.date?fmtHuman(t.date)+(t.time?', '+t.time:''):'без даты') :
+                    t.type==='range' ? (fmtHuman(t.start_date)+' – '+fmtHuman(t.end_date)) : 'без срока';
+
+    var html = '';
+    if(canWrite) html += '<div style="display:flex;justify-content:flex-end;"><button class="btn sm ghost" id="editTaskBtn">✎ Изменить</button></div>';
+    html += '<div class="status-line'+(t.status==='done'?' good':'')+'">'+esc(dateLabel)+(t.from_person?' · от '+esc(t.from_person):'')+'</div>';
+    if(t.description) html += '<p style="margin:0;font-size:13.5px;">'+esc(t.description)+'</p>';
+    if(t.location) html += '<p style="margin:0;font-size:12.5px;color:var(--ink-dim);">📍 '+esc(t.location)+'</p>';
+
+    var curStage = stageOf(t);
+    html += '<div><div style="font-size:12px;color:var(--ink-dim);font-weight:600;margin-bottom:6px;">ЭТАП</div><div class="stage-seg" id="stageSeg">' +
+      TASK_STAGES.map(function(c){ return '<button class="stage-btn'+(curStage===c[0]?' active':'')+'" style="--stage-c:'+STAGE_COLOR[c[0]]+'" data-stage="'+c[0]+'">'+esc(c[1])+'</button>'; }).join('') +
+      '</div></div>';
+
+    // checklist
+    html += '<div><div style="font-size:12px;color:var(--ink-dim);font-weight:600;margin-bottom:6px;">ЧЕК-ЛИСТ</div><div class="check-list">';
+    (t.checklist||[]).forEach(function(ci,idx){
+      html += '<label class="check-item'+(ci.done?' done':'')+'"><input type="checkbox" data-idx="'+idx+'" '+(ci.done?'checked':'')+'><span>'+esc(ci.text)+'</span></label>';
+    });
+    html += '</div></div>';
+
+    // notes log
+    html += '<div><div style="font-size:12px;color:var(--ink-dim);font-weight:600;margin-bottom:6px;">ЗАМЕТКИ</div>';
+    html += '<div class="log-list">' + (t.notes_log||[]).map(function(n){ return '<div class="log-item">'+esc(n.text)+'<time>'+fmtAtHuman(n.at)+'</time></div>'; }).join('') + '</div>';
+    html += '<div class="log-add" style="margin-top:6px;"><input type="text" id="noteLogInput" placeholder="Добавить заметку…"><button id="noteLogBtn">+</button></div></div>';
+
+    document.getElementById('taskBody').innerHTML = html;
+
+    var body = document.getElementById('taskBody');
+    var editTaskBtn = body.querySelector('#editTaskBtn');
+    if(editTaskBtn) editTaskBtn.addEventListener('click', function(){ taskEditMode = true; renderTaskModal(); });
+
+    if(!canWrite || !ref){
+      body.querySelectorAll('input,button').forEach(function(el){ el.disabled = true; });
+      return;
+    }
+
+    body.querySelectorAll('#stageSeg .stage-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var newStage = btn.getAttribute('data-stage');
+        body.querySelectorAll('#stageSeg .stage-btn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+        moveStage(slug, t, newStage);
+      });
+    });
+    body.querySelectorAll('.check-item input').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var idx = +cb.getAttribute('data-idx');
+        var list = (t.checklist||[]).slice();
+        list[idx] = Object.assign({}, list[idx], {done:cb.checked});
+        ref.update({checklist:list, updated_at:new Date().toISOString()});
+      });
+    });
+    function submitNoteLog(){
+      var inp = body.querySelector('#noteLogInput');
+      var v = inp.value.trim();
+      if(!v) return;
+      var list = (t.notes_log||[]).concat([{text:v, at:new Date().toISOString()}]);
+      ref.update({notes_log:list, updated_at:new Date().toISOString()}).then(function(){ inp.value=''; });
+    }
+    body.querySelector('#noteLogBtn').addEventListener('click', submitNoteLog);
+    body.querySelector('#noteLogInput').addEventListener('keydown', function(ev){ if(ev.key==='Enter') submitNoteLog(); });
+  }
+
+  function renderTaskEditForm(t, ref){
+    var body = document.getElementById('taskBody');
+    var html = '';
+    html += '<div class="field"><label>Название</label><input type="text" id="etTitle" value="'+esc(t.title)+'"></div>';
+    if(t.type==='point'){
+      html += '<div class="grid2"><div class="field"><label>Дата</label><input type="text" id="etDate" value="'+esc(t.date||'')+'" placeholder="ГГГГ-ММ-ДД"></div><div class="field"><label>Время</label><input type="text" id="etTime" value="'+esc(t.time||'')+'" placeholder="напр. 15:00"></div></div>';
+    } else if(t.type==='range'){
+      html += '<div class="grid2"><div class="field"><label>Начало</label><input type="text" id="etStart" value="'+esc(t.start_date||'')+'" placeholder="ГГГГ-ММ-ДД"></div><div class="field"><label>Конец</label><input type="text" id="etEnd" value="'+esc(t.end_date||'')+'" placeholder="ГГГГ-ММ-ДД"></div></div>';
+    }
+    html += '<div class="field"><label>Место</label><input type="text" id="etLoc" value="'+esc(t.location||'')+'"></div>';
+    html += '<div class="field"><label>От кого</label><input type="text" id="etFrom" value="'+esc(t.from_person||'')+'"></div>';
+    html += '<div class="field"><label>Описание</label><textarea id="etDesc">'+esc(t.description||'')+'</textarea></div>';
+    html += '<div class="row2"><button class="btn ghost" style="flex:1" id="etCancel">Отмена</button><button class="btn primary" style="flex:2" id="etSave">Сохранить</button></div>';
+    body.innerHTML = html;
+    if(!canWrite || !ref){ body.querySelectorAll('input,textarea,button').forEach(function(el){ el.disabled = true; }); return; }
+    body.querySelector('#etCancel').addEventListener('click', function(){ taskEditMode = false; renderTaskModal(); });
+    body.querySelector('#etSave').addEventListener('click', function(){
+      var patch = {
+        title: body.querySelector('#etTitle').value.trim() || t.title,
+        location: body.querySelector('#etLoc').value.trim(),
+        from_person: body.querySelector('#etFrom').value.trim(),
+        description: body.querySelector('#etDesc').value.trim(),
+        updated_at: new Date().toISOString()
+      };
+      if(t.type==='point'){
+        patch.date = body.querySelector('#etDate').value.trim();
+        patch.time = body.querySelector('#etTime').value.trim();
+      } else if(t.type==='range'){
+        patch.start_date = body.querySelector('#etStart').value.trim();
+        patch.end_date = body.querySelector('#etEnd').value.trim();
+      }
+      ref.update(patch).then(function(){ taskEditMode = false; renderTaskModal(); });
+    });
+  }
+
+  // ===================================================================
+  // ADD EMPLOYEE
+  // ===================================================================
+  var empEditId = null;
+  var empPhotoFile = null;
+  var empPhotoExistingId = null;
+  function refreshEmpPhotoPreview(name){
+    var prev = document.getElementById('empPhotoPreview');
+    if(empPhotoFile){ prev.innerHTML = '<img src="'+URL.createObjectURL(empPhotoFile)+'" alt="">'; }
+    else if(empPhotoExistingId){ prev.innerHTML = '<img src="'+esc(empPhotoExistingId)+'" alt="">'; }
+    else { prev.textContent = initials(name); }
+  }
+  function openEmpSheet(emp){
+    empEditId = emp ? emp.id : null;
+    empPhotoFile = null;
+    empPhotoExistingId = emp ? (emp.photo_id||null) : null;
+    document.getElementById('empSheetTitle').textContent = emp ? 'Изменить сотрудника' : 'Новый сотрудник';
+    document.getElementById('empName').value = emp ? emp.name : '';
+    document.getElementById('empPos').value = emp ? (emp.position||'') : '';
+    document.getElementById('empPhone').value = emp ? (emp.phone||'') : '';
+    document.getElementById('empEmail').value = emp ? (emp.email||'') : '';
+    document.getElementById('empTg').value = emp ? (emp.telegram||'') : '';
+    document.getElementById('empBio').value = emp ? (emp.bio||'') : '';
+    document.getElementById('empSave').textContent = emp ? 'Сохранить' : 'Добавить';
+    document.getElementById('empDeleteBtn').hidden = !emp;
+    document.getElementById('empPhotoCamera').value = '';
+    document.getElementById('empPhotoGallery').value = '';
+    refreshEmpPhotoPreview(emp ? emp.name : '');
+    document.getElementById('empOverlay').hidden = false;
+  }
+  document.getElementById('empClose').addEventListener('click', function(){ document.getElementById('empOverlay').hidden = true; });
+  document.getElementById('empOverlay').addEventListener('click', function(e){ if(e.target===this) this.hidden = true; });
+  function onEmpPhotoPicked(ev){
+    var file = ev.target.files && ev.target.files[0];
+    if(!file) return;
+    empPhotoFile = file;
+    refreshEmpPhotoPreview(document.getElementById('empName').value);
+  }
+  document.getElementById('empPhotoCamera').addEventListener('change', onEmpPhotoPicked);
+  document.getElementById('empPhotoGallery').addEventListener('change', onEmpPhotoPicked);
+  document.getElementById('empSave').addEventListener('click', function(){
+    var name = document.getElementById('empName').value.trim();
+    var pos = document.getElementById('empPos').value.trim();
+    var phone = document.getElementById('empPhone').value.trim();
+    var email = document.getElementById('empEmail').value.trim();
+    var tg = document.getElementById('empTg').value.trim();
+    var bio = document.getElementById('empBio').value.trim();
+    if(!name || !dbNs) return;
+    var saveBtn = document.getElementById('empSave');
+    saveBtn.disabled = true;
+    function withPhotoId(cb){
+      if(empPhotoFile && assetsNs){
+        assetsNs.upload(empPhotoFile).then(function(res){ cb(res.id); }).catch(function(){ cb(undefined); });
+      } else { cb(undefined); }
+    }
+    withPhotoId(function(photoId){
+      if(empEditId){
+        var patch = {name:name, position:pos, phone:phone, email:email, telegram:tg, bio:bio};
+        if(photoId) patch.photo_id = photoId;
+        dbNs.doc('employees/'+empEditId).update(patch).then(function(){
+          saveBtn.disabled = false;
+          document.getElementById('empOverlay').hidden = true;
+        }).catch(function(){ saveBtn.disabled = false; });
+      } else {
+        var id = 'emp_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+        var doc = {name:name, position:pos, phone:phone, email:email, telegram:tg, bio:bio, order: employees.length+1, created_at:new Date().toISOString()};
+        if(photoId) doc.photo_id = photoId;
+        dbNs.doc('employees/'+id).set(doc).then(function(){
+          saveBtn.disabled = false;
+          document.getElementById('empName').value=''; document.getElementById('empPos').value='';
+          document.getElementById('empPhone').value=''; document.getElementById('empEmail').value='';
+          document.getElementById('empTg').value=''; document.getElementById('empBio').value='';
+          document.getElementById('empOverlay').hidden = true;
+        }).catch(function(){ saveBtn.disabled = false; });
+      }
+    });
+  });
+  document.getElementById('empDeleteBtn').addEventListener('click', function(){
+    if(!empEditId || !dbNs) return;
+    var removedId = empEditId;
+    dbNs.doc('employees/'+removedId).delete().then(function(){
+      if(activeTab===removedId) activeTab = 'summary';
+      document.getElementById('empOverlay').hidden = true;
+    });
+  });
+
+  // ===================================================================
+  // CONTACTS TAB (visitnitsa)
+  // ===================================================================
+  function renderContactsTab(){
+    var wrap = document.createElement('div');
+    wrap.className = 'panel';
+    wrap.style.paddingBottom = '70px';
+
+    var subnav = document.createElement('div');
+    subnav.className = 'subnav';
+    [['list','Контакты'],['timeline','Хронология'],['assistant','Голосовой помощник']].forEach(function(p){
+      var b = document.createElement('button');
+      b.textContent = p[1];
+      if(contactsView===p[0]) b.className = 'active';
+      b.addEventListener('click', function(){ contactsView = p[0]; renderAll(); });
+      subnav.appendChild(b);
+    });
+    wrap.appendChild(subnav);
+
+    if(contactsView === 'assistant'){ wrap.appendChild(renderAssistantPanel()); return wrap; }
+    if(contactsView === 'timeline'){ wrap.appendChild(renderContactsTimeline()); return wrap; }
+
+    var search = document.createElement('div');
+    search.className = 'search';
+    search.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="contactSearch" type="text" placeholder="Имя, компания или должность">';
+    wrap.appendChild(search);
+
+    var countLine = document.createElement('p');
+    countLine.style.cssText = 'margin:0;color:var(--ink-dim);font-size:12.5px;';
+    wrap.appendChild(countLine);
+
+    var listEl = document.createElement('div');
+    listEl.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+    wrap.appendChild(listEl);
+
+    function draw(){
+      var q = search.querySelector('input').value.trim().toLowerCase();
+      var filtered = contacts.filter(function(c){
+        if(!q) return true;
+        return [c.name,c.company,c.position,c.phone].some(function(v){ return v && String(v).toLowerCase().indexOf(q)!==-1; });
+      });
+      filtered.sort(function(a,b){ return (a.name||'').localeCompare(b.name||'', 'ru'); });
+      countLine.textContent = contacts.length===0 ? 'Пока пусто' : contacts.length+' контакт'+contactPlural(contacts.length)+(q?' · показано '+filtered.length:'');
+
+      listEl.innerHTML = '';
+      if(!filtered.length){
+        var msg = contacts.length===0 ? 'Контактов пока нет. Сфотографируйте первую визитку кнопкой внизу справа.' : 'Ничего не найдено.';
+        var e = document.createElement('div'); e.className='empty'; e.textContent = msg; listEl.appendChild(e); return;
+      }
+      filtered.forEach(function(c){
+        var btn = document.createElement('button');
+        btn.className = 'contact-card';
+        var cStage = contactStageOf(c);
+        btn.innerHTML =
+          '<div class="avatar">'+(c.photo_id?'<img src="'+esc(c.photo_id)+'" alt="">':esc(initials(c.name)))+'</div>' +
+          '<div class="cc-body"><div class="cc-name">'+esc(c.name||'Без имени')+'</div><div class="cc-meta">'+esc([c.position,c.company].filter(Boolean).join(' · '))+'</div>' +
+          (c.event ? '<div class="cc-event">📌 '+esc(c.event)+'</div>' : '') +
+          '</div>' +
+          '<span class="cc-stage-dot" style="--stage-c:'+CONTACT_STAGE_COLOR[cStage]+'" title="'+esc(CONTACT_STAGE_LABEL[cStage])+'"></span>' +
+          '<div class="cc-phone tabular">'+esc(c.phone||'')+'</div>';
+        btn.addEventListener('click', function(){ openContactDetail(c.id); });
+        listEl.appendChild(btn);
+      });
+    }
+    search.querySelector('input').addEventListener('input', draw);
+    draw();
+
+    var fab = document.createElement('button');
+    fab.className = 'fab'; fab.setAttribute('aria-label','Добавить контакт');
+    fab.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>';
+    fab.hidden = !canWrite;
+    fab.addEventListener('click', openAddContact);
+    wrap.appendChild(fab);
+
+    return wrap;
+  }
+  function contactPlural(n){
+    var n10=n%10, n100=n%100;
+    if(n10===1 && n100!==11) return '';
+    if(n10>=2 && n10<=4 && (n100<10||n100>=20)) return 'а';
+    return 'ов';
+  }
+
+  // ===================================================================
+  // CONTACTS TIMELINE (Хронология) — who/where/when a card was added,
+  //   grouped by day, with the "Мероприятие" tag highlighted per contact.
+  // ===================================================================
+  var DOW_FULL = ['понедельник','вторник','среда','четверг','пятница','суббота','воскресенье'];
+  function renderContactsTimeline(){
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:14px;';
+    if(!contacts.length){
+      var e = document.createElement('div'); e.className = 'empty';
+      e.textContent = 'Пока пусто. Хронология заполнится по мере добавления визиток.';
+      wrap.appendChild(e);
+      return wrap;
+    }
+    var intro = document.createElement('p');
+    intro.style.cssText = 'margin:0;color:var(--ink-dim);font-size:12.5px;';
+    intro.textContent = 'Кто, когда и с какого мероприятия появился в визитнице — по дням добавления.';
+    wrap.appendChild(intro);
+
+    var groups = {};
+    contacts.forEach(function(c){
+      var key = c.created_at ? c.created_at.slice(0,10) : '—';
+      (groups[key] = groups[key] || []).push(c);
+    });
+    var keys = Object.keys(groups).sort(function(a,b){
+      if(a==='—') return 1;
+      if(b==='—') return -1;
+      return b.localeCompare(a);
+    });
+    keys.forEach(function(key){
+      var head = document.createElement('div');
+      head.className = 'tl-date-head';
+      if(key==='—'){
+        head.innerHTML = '<b>Без даты</b>';
+      } else {
+        var d = parseISO(key);
+        head.innerHTML = '<b>'+d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear()+'</b><span>'+esc(DOW_FULL[(d.getDay()+6)%7])+'</span>';
+      }
+      wrap.appendChild(head);
+
+      var group = document.createElement('div');
+      group.className = 'tl-group';
+      var list = groups[key].slice().sort(function(a,b){ return (b.created_at||'').localeCompare(a.created_at||''); });
+      list.forEach(function(c){
+        var btn = document.createElement('button');
+        btn.className = 'contact-card';
+        var cStage = contactStageOf(c);
+        var timeLabel = c.created_at ? fmtAtHuman(c.created_at).split(', ')[1] : '';
+        btn.innerHTML =
+          '<div class="avatar">'+(c.photo_id?'<img src="'+esc(c.photo_id)+'" alt="">':esc(initials(c.name)))+'</div>' +
+          '<div class="cc-body"><div class="cc-name">'+esc(c.name||'Без имени')+'</div><div class="cc-meta">'+esc([c.position,c.company].filter(Boolean).join(' · '))+'</div>' +
+          (c.event ? '<div class="cc-event">📌 '+esc(c.event)+'</div>' : '') +
+          '</div>' +
+          '<span class="cc-stage-dot" style="--stage-c:'+CONTACT_STAGE_COLOR[cStage]+'" title="'+esc(CONTACT_STAGE_LABEL[cStage])+'"></span>' +
+          (timeLabel ? '<div class="cc-phone tabular">'+esc(timeLabel)+'</div>' : '');
+        btn.addEventListener('click', function(){ openContactDetail(c.id); });
+        group.appendChild(btn);
+      });
+      wrap.appendChild(group);
+    });
+    return wrap;
+  }
+
+  // ===================================================================
+  // VOICE ASSISTANT (dictation-driven chat with tool calls)
+  //   True in-page microphone capture is not available here — the artifact
+  //   sandbox blocks getUserMedia and there is no microphone capability to
+  //   grant it. Instead the input is built for the DEVICE's own dictation
+  //   (phone keyboard mic icon, Win+H, Fn Fn on Mac), which types text into
+  //   the field without any page permission, then an assistant (via the
+  //   `sample` capability's tool-calling) acts on it.
+  // ===================================================================
+  function getWhoAmIId(){ try{ return localStorage.getItem('akk_whoami_id') || null; }catch(e){ return null; } }
+  function setWhoAmIId(id){ try{ localStorage.setItem('akk_whoami_id', id); }catch(e){} }
+  function whoAmIEmployee(){
+    var id = getWhoAmIId();
+    if(!id) return null;
+    return employees.find(function(e){ return e.id===id; }) || null;
+  }
+
+  var whoOverlay = document.getElementById('whoOverlay');
+  document.getElementById('whoClose').addEventListener('click', function(){ whoOverlay.hidden = true; });
+  whoOverlay.addEventListener('click', function(e){ if(e.target===whoOverlay) whoOverlay.hidden = true; });
+  function openWhoAmIPicker(){
+    var list = document.getElementById('whoList');
+    list.innerHTML = '';
+    if(!employees.length){
+      var e = document.createElement('div'); e.className='empty'; e.textContent='Сначала добавьте сотрудников.'; list.appendChild(e);
+    }
+    employees.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}).forEach(function(emp){
+      var b = document.createElement('button');
+      b.className = 'choice-btn';
+      b.textContent = emp.name + (emp.position?' — '+emp.position:'');
+      b.addEventListener('click', function(){ setWhoAmIId(emp.id); whoOverlay.hidden = true; renderAll(); });
+      list.appendChild(b);
+    });
+    whoOverlay.hidden = false;
+  }
+
+  function renderAssistantPanel(){
+    var box = document.createElement('div');
+    box.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+
+    var me = whoAmIEmployee();
+    var whoLine = document.createElement('div');
+    whoLine.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:var(--ink-dim);';
+    whoLine.innerHTML = '<span>'+(me ? 'Вы: <b style="color:var(--ink)">'+esc(me.name)+'</b>' : 'Профиль не выбран')+'</span>' +
+      '<button class="btn sm ghost" id="whoAmIBtn">'+(me?'Сменить':'Выбрать себя')+'</button>';
+    box.appendChild(whoLine);
+    whoLine.querySelector('#whoAmIBtn').addEventListener('click', openWhoAmIPicker);
+
+    var hint = document.createElement('p');
+    hint.style.cssText = 'margin:0;font-size:12px;color:var(--ink-dim);';
+    hint.textContent = 'Голос — через диктовку устройства (значок микрофона на клавиатуре телефона, Win+H на Windows, дважды Fn на Mac): надиктуйте в поле ниже, при необходимости поправьте текст и отправьте. Например: «поставь Джульетте задачу на пятницу — отвезти документы», «найди контакт Иван», «отметь, что Светлана Ким — с форума Digital Bridge 2026», «напиши письмо Ивану, что встреча переносится на завтра».';
+    box.appendChild(hint);
+
+    var log = document.createElement('div');
+    log.id = 'chatLog';
+    log.style.cssText = 'display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto;';
+    if(!chatHistory.length){
+      var empty = document.createElement('div'); empty.className='empty'; empty.style.marginTop='6px';
+      empty.textContent = 'Пока пусто. Продиктуйте или напишите первую команду.'; log.appendChild(empty);
+    }
+    chatHistory.forEach(function(m){ log.appendChild(chatBubble(m)); });
+    if(chatBusy){
+      var thinking = document.createElement('div');
+      thinking.style.cssText = 'align-self:flex-start;display:flex;align-items:center;gap:6px;color:var(--ink-dim);font-size:13px;';
+      thinking.innerHTML = '<span class="spinner"></span> Думаю…';
+      log.appendChild(thinking);
+    }
+    box.appendChild(log);
+
+    var inputRow = document.createElement('div');
+    inputRow.className = 'quickadd';
+    inputRow.innerHTML = '<input type="text" id="chatInput" placeholder="Нажмите и продиктуйте или напишите команду…"><button id="chatSendBtn">➤</button>';
+    box.appendChild(inputRow);
+
+    var sendBtn = inputRow.querySelector('#chatSendBtn');
+    var inputEl = inputRow.querySelector('#chatInput');
+    if(chatBusy){ sendBtn.disabled = true; inputEl.disabled = true; }
+    sendBtn.addEventListener('click', submitChat);
+    inputEl.addEventListener('keydown', function(ev){ if(ev.key==='Enter') submitChat(); });
+    if(!chatBusy) setTimeout(function(){ inputEl.focus(); }, 0);
+    setTimeout(function(){ log.scrollTop = log.scrollHeight; }, 0);
+
+    return box;
+  }
+
+  function chatBubble(m){
+    var isUser = m.role==='user';
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-direction:column;gap:4px;max-width:88%;align-self:'+(isUser?'flex-end':'flex-start')+';';
+    var bubble = document.createElement('div');
+    bubble.style.cssText = 'background:'+(isUser?'var(--accent)':'var(--surface-2)')+';color:'+(isUser?'var(--accent-ink)':'var(--ink)')+';border-radius:12px;padding:9px 12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word;';
+    bubble.textContent = m.text;
+    row.appendChild(bubble);
+    (m.actions||[]).forEach(function(a){
+      if(a.type==='mailto'){
+        var link = document.createElement('a');
+        link.href = a.href;
+        link.textContent = '✉ Открыть письмо для '+a.name;
+        link.className = 'btn sm';
+        link.style.cssText = 'text-decoration:none;display:inline-flex;width:fit-content;';
+        row.appendChild(link);
+        var note = document.createElement('div');
+        note.className = 'mailto-note';
+        note.textContent = 'Откроет вашу почтовую программу с готовым письмом — отправить нужно будет самому, работает не в каждом браузере.';
+        row.appendChild(note);
+      } else if(a.type==='task'){
+        var chip = document.createElement('div');
+        chip.className = 'status-line good';
+        chip.style.fontSize = '12px';
+        chip.textContent = '✓ Задача «'+a.title+'» добавлена'+(a.employee?' ('+a.employee+')':'')+(a.date?' на '+fmtHuman(a.date):' без срока');
+        row.appendChild(chip);
+      } else if(a.type==='event'){
+        var chip2 = document.createElement('div');
+        chip2.className = 'status-line good';
+        chip2.style.fontSize = '12px';
+        chip2.textContent = '📌 «'+a.contact+'» отмечен мероприятием «'+a.event+'»';
+        row.appendChild(chip2);
+      }
+    });
+    return row;
+  }
+
+  function submitChat(){
+    var inputEl = document.getElementById('chatInput');
+    if(!inputEl) return;
+    var text = inputEl.value.trim();
+    if(!text || chatBusy) return;
+    if(!sampleNs){
+      chatHistory.push({role:'user', text:text});
+      chatHistory.push({role:'assistant', text:'Голосовой помощник недоступен в этом окне.'});
+      renderAll();
+      return;
+    }
+    chatHistory.push({role:'user', text:text});
+    chatBusy = true;
+    renderAll();
+    runAssistant(text).then(function(reply){
+      chatHistory.push(reply);
+    }).catch(function(e){
+      chatHistory.push({role:'assistant', text: assistantErrorCopy(e)});
+    }).then(function(){
+      chatBusy = false;
+      renderAll();
+    });
+  }
+
+  function assistantErrorCopy(e){
+    var code = e && e.code;
+    if(code==='not_granted') return 'Доступ к помощнику не разрешён для этого окна.';
+    if(code==='rate_limited') return 'Сейчас перегружено — попробуйте через минуту.';
+    if(code==='tools_unavailable' || code==='images_unavailable') return 'В этом окне помощник не может выполнять действия.';
+    if(code==='session_expired') return 'Нужно войти заново, чтобы пользоваться помощником.';
+    return 'Не получилось обработать команду. Попробуйте переформулировать.';
+  }
+
+  function runAssistant(text){
+    var me = whoAmIEmployee();
+    var pendingActions = [];
+    var empList = employees.map(function(e){ return e.name; }).join('; ');
+
+    var tools = [
+      {
+        name: 'create_task',
+        description: 'Создаёт задачу в календаре указанного сотрудника АКК. Возвращает подтверждение с именем сотрудника, названием и датой.',
+        inputSchema: {
+          type:'object',
+          properties:{
+            employee_name:{type:'string', description:'Имя сотрудника как упомянуто, или "me" если это сам собеседник'},
+            title:{type:'string', description:'Короткое название задачи'},
+            date:{type:'string', description:'Дата в формате YYYY-MM-DD, или пустая строка если без срока'},
+            time:{type:'string', description:'Время, например 15:00, или пустая строка'},
+            location:{type:'string'},
+            description:{type:'string'}
+          },
+          required:['employee_name','title']
+        },
+        execute: function(input){
+          var empName = String(input.employee_name||'').trim().toLowerCase();
+          var target = null;
+          if(!empName || empName==='me' || empName==='я' || empName==='мне' || empName==='мной'){
+            target = me;
+          } else {
+            target = employees.find(function(e){
+              var n = e.name.toLowerCase();
+              return n.indexOf(empName)!==-1 || empName.indexOf(n)!==-1;
+            });
+          }
+          if(!target) throw new Error('Сотрудник не найден. Доступные: '+(empList||'нет сотрудников')+'.');
+          if(!dbNs || !canWrite) throw new Error('Нет прав на запись в этом окне.');
+          var title = String(input.title||'').trim();
+          if(!title) throw new Error('Не указано название задачи.');
+          var date = String(input.date||'').trim();
+          var doc = {
+            title:title, type: date?'point':'ongoing', status:'open',
+            date:date, time:String(input.time||'').trim(), start_date:'', end_date:'',
+            from_person:'', location:String(input.location||'').trim(),
+            description:String(input.description||'').trim(), notes:'', notes_log:[], checklist:[], attachments:[],
+            created_at:new Date().toISOString(), updated_at:new Date().toISOString()
+          };
+          return dbNs.collection('employees/'+target.id+'/tasks').add(doc).then(function(){
+            pendingActions.push({type:'task', title:title, employee:target.name, date:date});
+            return {ok:true, employee:target.name, title:title, date: date||'без срока'};
+          });
+        }
+      },
+      {
+        name: 'find_contact',
+        description: 'Ищет контакт в визитнице АКК по имени, компании, должности или телефону. Возвращает до 5 совпадений с id, именем и email.',
+        inputSchema: { type:'object', properties:{ query:{type:'string'} }, required:['query'] },
+        execute: function(input){
+          var q = String(input.query||'').trim().toLowerCase();
+          if(!q) return [];
+          return contacts.filter(function(c){
+            return [c.name,c.company,c.position,c.phone].some(function(v){ return v && String(v).toLowerCase().indexOf(q)!==-1; });
+          }).slice(0,5).map(function(c){
+            return {id:c.id, name:c.name||'', email:c.email||'', phone:c.phone||'', company:c.company||'', position:c.position||''};
+          });
+        }
+      },
+      {
+        name: 'draft_email',
+        description: 'Готовит письмо контакту (тема и текст) и возвращает ссылку для открытия в почтовой программе собеседника. Письмо НЕ отправляется автоматически — только готовится, отправляет человек сам. Сначала найди контакт через find_contact.',
+        inputSchema: {
+          type:'object',
+          properties:{ contact_id:{type:'string'}, contact_name:{type:'string'}, subject:{type:'string'}, body:{type:'string'} },
+          required:['subject','body']
+        },
+        execute: function(input){
+          var c = null;
+          if(input.contact_id) c = contacts.find(function(x){ return x.id===String(input.contact_id); });
+          if(!c && input.contact_name){
+            var q = String(input.contact_name).toLowerCase();
+            c = contacts.find(function(x){ return x.name && x.name.toLowerCase().indexOf(q)!==-1; });
+          }
+          if(!c) throw new Error('Контакт не найден — сначала вызови find_contact.');
+          if(!c.email) throw new Error('У контакта «'+c.name+'» не указан email.');
+          var href = 'mailto:'+encodeURIComponent(c.email)+'?subject='+encodeURIComponent(String(input.subject||''))+'&body='+encodeURIComponent(String(input.body||''));
+          pendingActions.push({type:'mailto', href:href, name:c.name});
+          return {ok:true, contact:c.name, email:c.email};
+        }
+      },
+      {
+        name: 'set_contact_event',
+        description: 'Отмечает мероприятие (форум, конференция, встреча), с которого контакт в визитнице — то, что нельзя распознать с фото визитки, а нужно услышать от человека. Если id контакта неизвестен — сначала вызови find_contact.',
+        inputSchema: {
+          type:'object',
+          properties:{ contact_id:{type:'string'}, contact_name:{type:'string'}, event:{type:'string', description:'Название мероприятия'} },
+          required:['event']
+        },
+        execute: function(input){
+          var c = null;
+          if(input.contact_id) c = contacts.find(function(x){ return x.id===String(input.contact_id); });
+          if(!c && input.contact_name){
+            var q2 = String(input.contact_name).toLowerCase();
+            c = contacts.find(function(x){ return x.name && x.name.toLowerCase().indexOf(q2)!==-1; });
+          }
+          if(!c) throw new Error('Контакт не найден — сначала вызови find_contact.');
+          if(!dbNs || !canWrite) throw new Error('Нет прав на запись в этом окне.');
+          var ev = String(input.event||'').trim();
+          if(!ev) throw new Error('Не указано название мероприятия.');
+          return dbNs.doc('contacts/'+c.id).update({event:ev}).then(function(){
+            pendingActions.push({type:'event', contact:c.name, event:ev});
+            return {ok:true, contact:c.name, event:ev};
+          });
+        }
+      }
+    ];
+
+    return sampleNs.limits().catch(function(){ return null; }).then(function(limits){
+      var canUseTools = !!(limits && limits.tools);
+      var context = 'Ты — голосовой помощник внутри корпоративного приложения задач и контактов АКК (Ассоциация корейцев Казахстана). ' +
+        'Сегодняшняя дата: '+todayISO+'. Сотрудники: '+(empList||'(пока никого)')+'. ' +
+        (me ? 'Собеседник — сотрудник «'+me.name+'»; если просит "мне"/"я" — это он/она. '
+             : 'Собеседник не выбрал свой профиль — если просит "мне", сначала уточни текстом, кто он, не вызывая инструмент. ') +
+        'Текст приходит через голосовую диктовку устройства — могут быть неточности распознавания, ориентируйся на смысл. ' +
+        (canUseTools
+          ? 'Чтобы поставить задачу — вызови create_task. Чтобы найти контакт — find_contact. Чтобы подготовить письмо контакту — сначала find_contact, затем draft_email (письмо не отправляется само, только готовится). Чтобы отметить, с какого мероприятия контакт (форум, конференция, встреча) — сначала find_contact, затем set_contact_event. Относительные даты ("завтра", "в пятницу", "через неделю") переводи в YYYY-MM-DD от сегодняшней даты.'
+          : 'В этом окне выполнять действия нельзя — только отвечай советом текстом.') +
+        ' Отвечай кратко и по-русски.';
+
+      var turns = [{role:'user', content:context}, {role:'assistant', content:'Понял, готов помогать.'}];
+      var history = chatHistory.slice(0, -1).slice(-6);
+      history.forEach(function(m){ turns.push({role:m.role, content:m.text}); });
+      turns.push({role:'user', content:text});
+
+      var opts = {modelTier:'default', cache:false};
+      if(canUseTools) opts.tools = tools;
+      return sampleNs(turns, opts);
+    }).then(function(res){
+      return {role:'assistant', text:res.text, actions:pendingActions};
+    });
+  }
+
+  // add contact flow
+  var addOverlay = document.getElementById('addOverlay');
+  var photoStep = document.getElementById('photoStep');
+  var photoInputCamera = document.getElementById('photoInputCamera');
+  var photoInputGallery = document.getElementById('photoInputGallery');
+  var photoPreviewWrap = document.getElementById('photoPreviewWrap');
+  var photoPreviewImg = document.getElementById('photoPreviewImg');
+  var recognizeStatus = document.getElementById('recognizeStatus');
+  var formFields = document.getElementById('formFields');
+  var retakeBtn = document.getElementById('retakeBtn');
+  var saveContactBtn = document.getElementById('saveContactBtn');
+  var fEventChips = document.getElementById('fEventChips');
+
+  function renderEventChips(){
+    var counts = {};
+    contacts.forEach(function(c){
+      var v = (c.event||'').trim();
+      if(!v) return;
+      var key = v.toLowerCase();
+      if(!counts[key]) counts[key] = {label:v, n:0, last:c.created_at||''};
+      counts[key].n++;
+      if((c.created_at||'') > counts[key].last) counts[key].last = c.created_at||'';
+    });
+    var list = Object.keys(counts).map(function(k){ return counts[k]; });
+    list.sort(function(a,b){ return b.n-a.n || (b.last||'').localeCompare(a.last||''); });
+    list = list.slice(0,6);
+    fEventChips.innerHTML = '';
+    list.forEach(function(item){
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'event-chip';
+      chip.textContent = item.label;
+      chip.addEventListener('click', function(){ document.getElementById('fEvent').value = item.label; });
+      fEventChips.appendChild(chip);
+    });
+  }
+
+  var contactFormMode = 'add';   // 'add' | 'edit'
+  var contactFormEditId = null;
+  var CONTACT_STAGES = [['new','Новый'],['talks','Переговоры'],['partner','Партнёр']];
+  var CONTACT_STAGE_LABEL = {new:'Новый', talks:'Переговоры', partner:'Партнёр'};
+  var CONTACT_STAGE_COLOR = {new:'var(--ink-dim)', talks:'var(--accent)', partner:'var(--good)'};
+  function contactStageOf(c){
+    if(c && c.stage && CONTACT_STAGE_LABEL[c.stage]) return c.stage;
+    return 'new';
+  }
+  function setFStage(stage){
+    document.querySelectorAll('#fStageSeg .stage-btn').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-stage')===stage);
+    });
+  }
+  document.querySelectorAll('#fStageSeg .stage-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setFStage(b.getAttribute('data-stage')); });
+  });
+  function getFStage(){
+    var active = document.querySelector('#fStageSeg .stage-btn.active');
+    return active ? active.getAttribute('data-stage') : 'new';
+  }
+
+  function openAddContact(){
+    contactFormMode = 'add'; contactFormEditId = null;
+    addOverlay.querySelector('.sheet-head h2').textContent = 'Новый контакт';
+    selectedContactFile = null;
+    photoInputCamera.value = ''; photoInputGallery.value = '';
+    photoStep.hidden = false; photoPreviewWrap.hidden = true; recognizeStatus.hidden = true;
+    formFields.hidden = true; retakeBtn.hidden = true; saveContactBtn.hidden = true;
+    saveContactBtn.textContent = 'Сохранить контакт';
+    ['fName','fPosition','fCompany','fPhone','fEmail','fNote','fEvent','fNextStep','fNextDate'].forEach(function(id){ document.getElementById(id).value=''; });
+    setFStage('new');
+    renderEventChips();
+    addOverlay.hidden = false;
+  }
+  function openEditContact(c){
+    contactFormMode = 'edit'; contactFormEditId = c.id;
+    addOverlay.querySelector('.sheet-head h2').textContent = 'Редактировать контакт';
+    selectedContactFile = null;
+    photoInputCamera.value = ''; photoInputGallery.value = '';
+    photoStep.hidden = true;
+    if(c.photo_id){ photoPreviewWrap.hidden = false; photoPreviewImg.src = ''+c.photo_id; }
+    else photoPreviewWrap.hidden = true;
+    recognizeStatus.hidden = true;
+    formFields.hidden = false; retakeBtn.hidden = false; saveContactBtn.hidden = false; saveContactBtn.disabled = false;
+    saveContactBtn.textContent = 'Сохранить изменения';
+    document.getElementById('fName').value = c.name||'';
+    document.getElementById('fPosition').value = c.position||'';
+    document.getElementById('fCompany').value = c.company||'';
+    document.getElementById('fPhone').value = c.phone||'';
+    document.getElementById('fEmail').value = c.email||'';
+    document.getElementById('fNote').value = c.notes||'';
+    document.getElementById('fEvent').value = c.event||'';
+    document.getElementById('fNextStep').value = c.next_step||'';
+    document.getElementById('fNextDate').value = c.next_step_date||'';
+    setFStage(contactStageOf(c));
+    renderEventChips();
+    detailOverlay.hidden = true;
+    addOverlay.hidden = false;
+  }
+  document.getElementById('addClose').addEventListener('click', function(){ addOverlay.hidden = true; });
+  addOverlay.addEventListener('click', function(e){ if(e.target===addOverlay) addOverlay.hidden = true; });
+
+  function onContactPhotoPicked(ev){
+    var input = ev.target;
+    var file = input.files && input.files[0];
+    if(!file) return;
+    selectedContactFile = file;
+    photoPreviewImg.src = URL.createObjectURL(file);
+    photoStep.hidden = true; photoPreviewWrap.hidden = false; formFields.hidden = false;
+    retakeBtn.hidden = false; saveContactBtn.hidden = false; saveContactBtn.disabled = false;
+    tryRecognizeContact(file);
+  }
+  photoInputCamera.addEventListener('change', onContactPhotoPicked);
+  photoInputGallery.addEventListener('change', onContactPhotoPicked);
+  retakeBtn.addEventListener('click', function(){
+    selectedContactFile = null; photoInputCamera.value=''; photoInputGallery.value='';
+    photoStep.hidden = false; photoPreviewWrap.hidden = true; recognizeStatus.hidden = true;
+  });
+  function setContactStatus(kind, html){
+    recognizeStatus.hidden = false;
+    recognizeStatus.className = 'status-line'+(kind?' '+kind:'');
+    recognizeStatus.innerHTML = html;
+  }
+  function tryRecognizeContact(file){
+    if(!sampleNs){ setContactStatus('', 'Автораспознавание недоступно — заполните поля вручную.'); return; }
+    sampleNs.limits().then(function(limits){
+      if(!limits.images){ setContactStatus('', 'Автораспознавание фото недоступно здесь — заполните поля вручную.'); return; }
+      setContactStatus('', '<span class="spinner"></span> Распознаю визитку…');
+      var prompt = 'Это фотография деловой визитки (может быть на русском, казахском, корейском или английском). '
+        + 'Прочитай с неё данные и верни ТОЛЬКО JSON-объект без пояснений, строго такого вида: '
+        + '{"name": "Имя Фамилия", "position": "должность", "company": "название компании/организации", "phone": "телефон как на визитке", "email": "email"}. '
+        + 'Если какого-то поля на визитке нет — поставь пустую строку "". Не выдумывай данные.';
+      sampleNs.json(prompt, {images:[file], modelTier:'quick'}).then(function(data){
+        document.getElementById('fName').value = data.name||'';
+        document.getElementById('fPosition').value = data.position||'';
+        document.getElementById('fCompany').value = data.company||'';
+        document.getElementById('fPhone').value = data.phone||'';
+        document.getElementById('fEmail').value = data.email||'';
+        setContactStatus('good', 'Распознано — проверьте поля и сохраните.');
+      }).catch(function(e){
+        if(e.code==='not_granted') setContactStatus('', 'Автораспознавание не разрешено — заполните поля вручную.');
+        else if(e.code==='rate_limited') setContactStatus('warn', 'Сейчас перегружено — заполните поля вручную или попробуйте позже.');
+        else setContactStatus('warn', 'Не удалось распознать автоматически — заполните поля вручную.');
+      });
+    }).catch(function(){ setContactStatus('', 'Автораспознавание недоступно — заполните поля вручную.'); });
+  }
+  saveContactBtn.addEventListener('click', function(){
+    var name = document.getElementById('fName').value.trim();
+    if(!name){ setContactStatus('warn', 'Укажите хотя бы имя.'); return; }
+    if(!dbNs){ setContactStatus('warn', 'База недоступна.'); return; }
+    var isEdit = contactFormMode==='edit';
+    var savingLabel = isEdit ? 'Сохранить изменения' : 'Сохранить контакт';
+    saveContactBtn.disabled = true; saveContactBtn.textContent = 'Сохраняю…';
+    var record = {
+      name:name, position:document.getElementById('fPosition').value.trim(), company:document.getElementById('fCompany').value.trim(),
+      phone:document.getElementById('fPhone').value.trim(), email:document.getElementById('fEmail').value.trim(),
+      notes:document.getElementById('fNote').value.trim(),
+      event:document.getElementById('fEvent').value.trim(),
+      stage:getFStage(),
+      next_step:document.getElementById('fNextStep').value.trim(),
+      next_step_date:document.getElementById('fNextDate').value.trim()
+    };
+    if(!isEdit) record.created_at = new Date().toISOString();
+    function finishSave(photoId){
+      if(photoId) record.photo_id = photoId;
+      if(isEdit){
+        dbNs.doc('contacts/'+contactFormEditId).update(record).then(function(){
+          saveContactBtn.disabled = false; saveContactBtn.textContent = savingLabel;
+          addOverlay.hidden = true;
+        }).catch(function(){
+          saveContactBtn.disabled = false; saveContactBtn.textContent = savingLabel;
+          setContactStatus('warn', 'Не удалось сохранить. Попробуйте ещё раз.');
+        });
+        return;
+      }
+      var afterUser = userNs ? userNs.id().catch(function(){return null;}) : Promise.resolve(null);
+      afterUser.then(function(uid){
+        if(uid) record.added_by = uid;
+        return dbNs.collection('contacts').add(record);
+      }).then(function(){
+        saveContactBtn.disabled = false; saveContactBtn.textContent = savingLabel;
+        addOverlay.hidden = true;
+      }).catch(function(e){
+        saveContactBtn.disabled = false; saveContactBtn.textContent = savingLabel;
+        setContactStatus('warn', 'Не удалось сохранить. Попробуйте ещё раз.');
+      });
+    }
+    if(selectedContactFile && assetsNs){
+      assetsNs.upload(selectedContactFile).then(function(res){ finishSave(res.id); }).catch(function(){ finishSave(null); });
+    } else { finishSave(null); }
+  });
+
+  // contact detail
+  var detailOverlay = document.getElementById('detailOverlay');
+  var detailName = document.getElementById('detailName');
+  var detailPhotoWrap = document.getElementById('detailPhotoWrap');
+  var detailPhotoImg = document.getElementById('detailPhotoImg');
+  var detailRows = document.getElementById('detailRows');
+  var deleteContactBtn = document.getElementById('deleteContactBtn');
+  var editContactBtn = document.getElementById('editContactBtn');
+
+  function detailRow(label, value, mailto){
+    if(!value) return '';
+    var action = mailto ? '<a href="mailto:'+esc(value)+'" class="copy-btn" style="text-decoration:none;">написать</a>' : '';
+    return '<div class="detail-row"><span class="detail-label">'+esc(label)+'</span>' +
+      '<span class="detail-value-wrap"><span class="detail-value">'+esc(value)+'</span>'+action+'</span></div>';
+  }
+  var detailCrm = document.getElementById('detailCrm');
+  function openContactDetail(id){
+    var c = contacts.find(function(x){return x.id===id;});
+    if(!c) return;
+    editingContactId = id;
+    detailName.textContent = c.name || 'Без имени';
+    if(c.photo_id){ detailPhotoWrap.hidden = false; detailPhotoImg.src = ''+c.photo_id; }
+    else detailPhotoWrap.hidden = true;
+
+    var stage = contactStageOf(c);
+    var nextOverdue = c.next_step_date && c.next_step_date < todayISO;
+    detailCrm.innerHTML =
+      (c.event ? '<div class="event-banner">📌 '+esc(c.event)+'</div>' : '') +
+      '<span class="stage-pill" style="--pill-c:'+CONTACT_STAGE_COLOR[stage]+'">'+esc(CONTACT_STAGE_LABEL[stage])+'</span>' +
+      '<div class="crm-box" style="margin-top:7px;">' +
+        '<div class="crm-line"><span>Последний контакт</span><b>'+(c.last_contact_at ? fmtHuman(c.last_contact_at) : '—')+'</b></div>' +
+        (canWrite ? '<button class="crm-touch-btn" id="markContactedBtn" style="align-self:flex-start;">✓ Связались сегодня</button>' : '') +
+        (c.next_step ? '<div class="crm-line'+(nextOverdue?' overdue':'')+'"><span>Следующий шаг</span><b>'+esc(c.next_step)+(c.next_step_date?' · '+fmtHuman(c.next_step_date):'')+'</b></div>' : '') +
+      '</div>';
+    var markBtn = document.getElementById('markContactedBtn');
+    if(markBtn) markBtn.addEventListener('click', function(){
+      markBtn.disabled = true; markBtn.textContent = '…';
+      dbNs.doc('contacts/'+id).update({last_contact_at:todayISO}).catch(function(){}).then(function(){
+        markBtn.disabled = false; markBtn.textContent = '✓ Связались сегодня';
+      });
+    });
+
+    detailRows.innerHTML =
+      detailRow('Должность', c.position) + detailRow('Компания', c.company) +
+      detailRow('Телефон', c.phone) + detailRow('Email', c.email, true) +
+      detailRow('Заметка', c.notes) +
+      detailRow('Добавлен', c.created_at ? fmtAtHuman(c.created_at) : '') +
+      (c.email ? '<p class="mailto-note">Ссылка «написать» открывает вашу почтовую программу — работает не в каждом браузере/окне, адрес выше можно скопировать вручную.</p>' : '');
+    deleteContactBtn.hidden = !canWrite;
+    editContactBtn.hidden = !canWrite;
+    detailOverlay.hidden = false;
+  }
+  document.getElementById('detailClose').addEventListener('click', function(){ detailOverlay.hidden = true; });
+  detailOverlay.addEventListener('click', function(e){ if(e.target===detailOverlay) detailOverlay.hidden = true; });
+  editContactBtn.addEventListener('click', function(){
+    var c = contacts.find(function(x){return x.id===editingContactId;});
+    if(c) openEditContact(c);
+  });
+  deleteContactBtn.addEventListener('click', function(){
+    if(!editingContactId || !dbNs) return;
+    deleteContactBtn.disabled = true; deleteContactBtn.textContent = 'Удаляю…';
+    dbNs.doc('contacts/'+editingContactId).delete().then(function(){
+      detailOverlay.hidden = true; deleteContactBtn.disabled = false; deleteContactBtn.textContent = 'Удалить';
+    }).catch(function(){ deleteContactBtn.disabled = false; deleteContactBtn.textContent = 'Удалить'; });
+  });
+
+  // ===================================================================
+  // BOOT
+  // ===================================================================
+  function subscribeEmployee(id){
+    if(subscribed[id] || !dbNs) return;
+    subscribed[id] = true;
+    tasksBySlug[id] = tasksBySlug[id] || [];
+    dayNotesBySlug[id] = dayNotesBySlug[id] || {};
+    dbNs.collection('employees/'+id+'/tasks').onSnapshot(function(snap){
+      tasksBySlug[id] = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      renderAll();
+    }, function(){});
+    dbNs.collection('employees/'+id+'/day_notes').onSnapshot(function(snap){
+      var map = {};
+      snap.docs.forEach(function(d){ map[d.id] = (d.data()||{}).entries || []; });
+      dayNotesBySlug[id] = map;
+      renderAll();
+    }, function(){});
+  }
+
+  function bootDb(){
+    if(!dbNs){ document.getElementById('main').innerHTML = '<div class="empty">База недоступна в этом окне.</div>'; return; }
+    dbNs.collection('employees').onSnapshot(function(snap){
+      employees = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      employees.forEach(function(e){ subscribeEmployee(e.id); });
+      if(activeTab==='summary' && !employees.length){ /* fine, summary renders empty state */ }
+      if(activeTab!=='summary' && activeTab!=='contacts' && !employees.find(function(e){return e.id===activeTab;})){
+        // keep tab selection even if not yet loaded; once it loads it will render
+      }
+      renderAll();
+    }, function(){});
+    dbNs.collection('contacts').onSnapshot(function(snap){
+      contacts = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      if(activeTab==='contacts') renderAll();
+    }, function(){});
+  }
+
+  function boot(){
+    var w = (window.claude && window.claude.use) ? window.claude : null;
+    var uses = w ? [
+      w.use('db').catch(function(){return null;}),
+      w.use('assets').catch(function(){return null;}),
+      w.use('sample').catch(function(){return null;}),
+      w.use('user').catch(function(){return null;})
+    ] : [Promise.resolve(null),Promise.resolve(null),Promise.resolve(null),Promise.resolve(null)];
+    Promise.all(uses).then(function(res){
+      dbNs=res[0]; assetsNs=res[1]; sampleNs=res[2]; userNs=res[3];
+      canWrite = !!assetsNs;
+      renderAll();
+      bootDb();
+    });
+  }
+  renderAll();
+  boot();
+})();
+</script>
