@@ -4,7 +4,1895 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- "Add to Home Screen" support: a manifest + touch icons let a phone pin this
      page as a standalone, full-screen app icon (Android reads the manifest,
-     iOS reads the apple-touch-icon/meta tags — belt and suspenders). -->
+     iOS reads the app<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-0: #f4f5f7;
+    --surface-1: #ffffff;
+    --surface-2: #eceef2;
+    --border: #dde1e8;
+    --text-primary: #14192b;
+    --text-secondary: #59617a;
+    --text-muted: #8891a6;
+    --navy: #16213e;
+    --navy-ink: #0d1428;
+    --accent: #2a78d6;
+    --good: #0ca30c;
+    --warning: #b8790a;
+    --warning-bg: #fdf1d9;
+    --serious: #c05a2f;
+    --critical: #d03b3b;
+    --critical-bg: #fbe4e4;
+    --warning-chip-bg: #fdf1d9;
+    --info-bg: #e8eefb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-0: #14161c;
+      --surface-1: #1b1e26;
+      --surface-2: #23272f;
+      --border: #323744;
+      --text-primary: #f2f3f6;
+      --text-secondary: #aab0c0;
+      --text-muted: #7c8394;
+      --navy: #1d2b4f;
+      --navy-ink: #101a33;
+      --accent: #5b9ce8;
+      --good: #3fc93f;
+      --warning: #f0b23a;
+      --warning-bg: #3a2f14;
+      --serious: #e58657;
+      --critical: #e66767;
+      --critical-bg: #3a1c1c;
+      --warning-chip-bg: #3a2f14;
+      --info-bg: #172236;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-0: #14161c;
+    --surface-1: #1b1e26;
+    --surface-2: #23272f;
+    --border: #323744;
+    --text-primary: #f2f3f6;
+    --text-secondary: #aab0c0;
+    --text-muted: #7c8394;
+    --navy: #1d2b4f;
+    --navy-ink: #101a33;
+    --accent: #5b9ce8;
+    --good: #3fc93f;
+    --warning: #f0b23a;
+    --warning-bg: #3a2f14;
+    --serious: #e58657;
+    --critical: #e66767;
+    --critical-bg: #3a1c1c;
+    --warning-chip-bg: #3a2f14;
+    --info-bg: #172236;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    padding-inline: 20px;
+    padding-block: 20px 48px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  header.top {
+    background: linear-gradient(155deg, var(--navy), var(--navy-ink));
+    color: #f4f6fb;
+    border-radius: 14px;
+    padding: 22px 26px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 14px;
+  }
+  header.top .title-block h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  header.top .title-block p {
+    margin: 0;
+    color: #c3cbe0;
+    font-size: 13px;
+  }
+  header.top .meta {
+    text-align: right;
+    font-size: 12px;
+    color: #aab4d0;
+  }
+  header.top .meta .run-date {
+    font-size: 14px;
+    color: #f4f6fb;
+    font-weight: 600;
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .kpi {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .kpi .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+  .kpi .value { font-size: 26px; font-weight: 700; }
+  .kpi.critical .value { color: var(--critical); }
+  .kpi.warning .value { color: var(--warning); }
+  .kpi.good .value { color: var(--good); }
+  .kpi .sub { font-size: 12px; color: var(--text-secondary); }
+
+  .panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .panel h2 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .panel .panel-sub {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 760px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  .issue {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--critical);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--surface-2);
+  }
+  .issue:last-child { margin-bottom: 0; }
+  .issue.warning { border-left-color: var(--warning); }
+  .issue .issue-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .chip.critical { background: var(--critical-bg); color: var(--critical); }
+  .chip.warning { background: var(--warning-chip-bg); color: var(--warning); }
+  .chip.info { background: var(--info-bg); color: var(--accent); }
+  .chip.good { background: #e2f6e2; color: var(--good); }
+
+  .view-toggle-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .big-btn {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 11px 19px;
+    border-radius: 11px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s, transform 0.06s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .big-btn:hover { border-color: var(--accent); color: var(--text-primary); transform: translateY(-1px); }
+  .big-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .big-btn .icon { font-size: 16px; }
+
+  .metric-toggle-row { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  .date-picker {
+    display: flex;
+    gap: 9px;
+    overflow-x: auto;
+    padding: 4px 4px 14px;
+    margin-bottom: 6px;
+  }
+  .date-chip {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 74px;
+    padding: 10px 12px;
+    border-radius: 13px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .date-chip:hover { border-color: var(--accent); }
+  .date-chip.active { background: var(--navy); border-color: var(--navy); }
+  .date-chip.active .dc-date, .date-chip.active .dc-type { color: #f4f6fb; }
+  .date-chip .dc-period { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); font-weight: 700; }
+  .date-chip.active .dc-period { color: #c3cbe0; }
+  .date-chip .dc-date { font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 14px; color: var(--text-primary); }
+  .date-chip .dc-type { font-size: 10px; color: var(--text-muted); }
+
+  .post-detail-card {
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface-2);
+    padding: 22px 24px 24px;
+    margin-top: 6px;
+  }
+  .post-detail-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .post-detail-head .pd-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .post-detail-head .pd-date { font-size: 21px; font-weight: 700; }
+  .nav-arrow-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-primary);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+    flex: 0 0 auto;
+  }
+  .nav-arrow-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--info-bg); }
+  .nav-arrow-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .big-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    gap: 14px;
+  }
+  .big-stat-tile {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 14px;
+    text-align: center;
+  }
+  .big-stat-tile .bs-icon { font-size: 24px; margin-bottom: 8px; }
+  .big-stat-tile .bs-value { font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1.1; }
+  .big-stat-tile .bs-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 7px; }
+  .big-stat-tile .bs-delta { display: inline-block; margin-top: 9px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .big-stat-tile .bs-delta.good { background: #e2f6e2; color: var(--good); }
+  .big-stat-tile .bs-delta.bad { background: var(--critical-bg); color: var(--critical); }
+  .big-stat-tile .bs-delta.neutral { background: var(--surface-2); color: var(--text-muted); }
+  .big-stat-tile .bs-avg { font-size: 10.5px; color: var(--text-muted); margin-top: 5px; }
+
+  .ig-group-posts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .ig-group-post-chip { font-size: 11.5px; padding: 4px 10px; border-radius: 999px; background: var(--surface-1); border: 1px solid var(--border); color: var(--text-secondary); }
+
+  .post-link { color: inherit; text-decoration: none; }
+  .post-link:hover { text-decoration: underline; }
+  .post-link-icon { font-size: 0.72em; opacity: 0.35; margin-left: 3px; transition: opacity 0.15s; display: inline-block; }
+  .post-link:hover .post-link-icon { opacity: 0.9; }
+
+  .ig-animated {
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  .ig-animated.fading {
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .filter-btn {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .issue .source-tag {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+  .issue blockquote {
+    margin: 0 0 6px;
+    padding: 8px 10px;
+    background: var(--surface-1);
+    border-radius: 6px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-primary);
+    border: 1px dashed var(--border);
+  }
+  .issue p.desc {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  .verif-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .verif-item:last-child { border-bottom: none; }
+  .verif-dot {
+    flex: 0 0 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--warning);
+    margin-top: 6px;
+  }
+  .verif-item .who {
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+  .verif-item .what {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .verif-item .added {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .source-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .source-row:last-child { border-bottom: none; }
+  .source-row .label { color: var(--text-primary); }
+  .source-row .note { color: var(--text-muted); font-size: 11.5px; }
+  .status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-badge.ok { background: #e2f6e2; color: var(--good); }
+  .status-badge.limited { background: var(--warning-chip-bg); color: var(--warning); }
+  .status-badge.pending { background: var(--surface-2); color: var(--text-muted); }
+
+  .placeholder-card {
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    padding: 22px 18px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    background: var(--surface-2);
+  }
+  .placeholder-card strong {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    margin-bottom: 4px;
+  }
+
+  .social-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .social-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .social-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .social-card-head .platform {
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+  .social-stats {
+    display: flex;
+    gap: 16px;
+  }
+  .social-stat .n { font-size: 17px; font-weight: 700; }
+  .social-stat .l { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .social-latest {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    background: var(--surface-1);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .social-latest .when { color: var(--text-muted); font-size: 11px; margin-bottom: 3px; }
+  .social-flag {
+    font-size: 12px;
+    color: var(--warning);
+    display: flex;
+    gap: 6px;
+  }
+
+  .chart-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 220px;
+    padding: 4px 4px 0;
+    margin-bottom: 8px;
+  }
+  .chart-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 7px;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 6px 3px 4px;
+    transition: background 0.12s;
+  }
+  .chart-bar-col:hover { background: var(--surface-2); }
+  .chart-bar-col.selected .chart-bar { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .chart-bar-col.selected .chart-bar-label { color: var(--text-primary); font-weight: 700; }
+  .chart-bar-value {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  .chart-bar {
+    width: 100%;
+    max-width: 48px;
+    background: var(--accent);
+    border-radius: 5px 5px 0 0;
+    min-height: 4px;
+  }
+  .chart-bar.current { background: var(--good); }
+  .chart-bar-label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.25;
+  }
+  .chart-bar.before { background: var(--text-muted); opacity: 0.55; }
+  .chart-divider {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    padding: 0 2px;
+  }
+  .chart-divider .line {
+    width: 2px;
+    flex: 1;
+    background: var(--accent);
+    border-radius: 2px;
+    margin-bottom: 6px;
+  }
+  .chart-divider .divider-label {
+    font-size: 9.5px;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 54px;
+  }
+  .chart-legend {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .chart-legend .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  .history-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 12px 0 4px;
+  }
+  @media (max-width: 600px) {
+    .history-compare { grid-template-columns: 1fr; }
+  }
+  .compare-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+  }
+  .compare-card .cc-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .compare-card .cc-value {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+  .compare-card.after { border-color: var(--good); }
+  .traffic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .traffic-stat {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+  }
+  .traffic-stat .t-label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
+  }
+  .traffic-stat .t-value {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .traffic-note {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--warning-bg);
+    border: 1px dashed var(--warning);
+    border-radius: 8px;
+    padding: 9px 11px;
+    margin-top: 4px;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .data-table th {
+    text-align: right;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0 8px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table th:first-child, .data-table td:first-child { text-align: left; }
+  .data-table td {
+    padding: 7px 8px;
+    text-align: right;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tr.divider-row td {
+    border-bottom: 2px solid var(--accent);
+  }
+  .data-table tr.avg-row td {
+    font-weight: 700;
+    background: var(--surface-2);
+    border-bottom: none;
+  }
+  .data-table td.rowlabel { font-family: "IBM Plex Sans", sans-serif; color: var(--text-secondary); }
+  .data-table th.sortable { cursor: pointer; user-select: none; }
+  .data-table th.sortable:hover { color: var(--text-primary); }
+  .data-table th .sort-arrow { margin-left: 3px; opacity: 0.7; }
+  .data-table .pct { font-size: 10.5px; margin-left: 4px; }
+  .pct.up-good { color: var(--good); }
+  .pct.up-bad { color: var(--critical); }
+  .pct.down-good { color: var(--good); }
+  .pct.down-bad { color: var(--critical); }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 14px 0 4px;
+  }
+  .metric-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    text-align: center;
+  }
+  .metric-card .m-label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+  .metric-card .m-flow {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .metric-card .m-flow .arrow { color: var(--text-muted); font-weight: 400; }
+  .metric-card .m-pct {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .metric-card .m-pct.good { background: #e2f6e2; color: var(--good); }
+  .metric-card .m-pct.bad { background: var(--critical-bg); color: var(--critical); }
+
+  .share-block { margin: 6px 0 14px; }
+  .share-block .share-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .share-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; }
+  .share-row .share-name { flex: 0 0 90px; color: var(--text-secondary); }
+  .share-row .share-track { flex: 1; height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+  .share-row .share-fill { height: 100%; border-radius: 6px; }
+  .share-row .share-val { flex: 0 0 42px; text-align: right; font-family: "IBM Plex Mono", monospace; color: var(--text-primary); font-weight: 600; }
+
+  .top-post-list { display: flex; flex-direction: column; gap: 10px; }
+  .top-post-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+  }
+  .top-post-card .tp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .top-post-card .tp-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .top-post-card .tp-date { font-size: 11px; color: var(--text-muted); }
+  .top-post-card .tp-quote { font-size: 13px; color: var(--text-primary); margin-bottom: 6px; font-style: italic; }
+  .top-post-card .tp-stats { font-size: 11.5px; color: var(--text-secondary); font-family: "IBM Plex Mono", monospace; }
+
+  .comment-callouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .comment-callouts .cstat { text-align: center; padding: 10px 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
+  .comment-callouts .cstat .c-value { font-size: 20px; font-weight: 700; color: var(--critical); font-family: "IBM Plex Mono", monospace; }
+  .comment-callouts .cstat .c-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  .indexing-bar-wrap { display: flex; height: 14px; border-radius: 7px; overflow: hidden; margin: 6px 0 8px; }
+  .indexing-bar-wrap .seg-ok { background: var(--good); }
+  .indexing-bar-wrap .seg-bad { background: var(--text-muted); opacity: 0.5; }
+  .indexing-legend { display: flex; gap: 16px; font-size: 11.5px; color: var(--text-secondary); }
+  .indexing-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .history-item {
+    display: flex;
+    gap: 10px;
+    font-size: 12.5px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-item .h-date {
+    flex: 0 0 72px;
+    color: var(--text-muted);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    padding-top: 1px;
+  }
+  .history-item .h-text { color: var(--text-secondary); }
+  .history-item .h-text b { color: var(--text-primary); font-weight: 600; }
+  .history-item .h-flag { color: var(--warning); font-size: 11.5px; margin-top: 2px; }
+
+  .diff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .diff-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .diff-item .diff-icon { font-size: 14px; line-height: 1.4; }
+  .diff-item .diff-text { color: var(--text-secondary); }
+  .diff-item .diff-text b { color: var(--text-primary); font-weight: 600; }
+  .diff-item.fixed { border-color: var(--good); }
+  .diff-item.new { border-color: var(--critical); }
+  .diff-item.unchanged { opacity: 0.85; }
+
+  footer.methodology {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    padding: 14px 4px 0;
+    line-height: 1.6;
+  }
+  footer.methodology b { color: var(--text-secondary); }
+
+  .strategy-banner {
+    background: linear-gradient(135deg, var(--navy), var(--navy-ink));
+    border: none;
+  }
+  .strategy-banner-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+  .strategy-banner .chip.new { background: rgba(255,255,255,0.14); color: #dce6f7; margin-bottom: 8px; }
+  .strategy-banner h2 { color: #f4f6fb; margin: 0 0 6px; }
+  .strategy-banner .panel-sub { color: #c3cbe0; margin: 0; max-width: 620px; }
+  .strategy-btn {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: var(--navy-ink);
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 13px 22px;
+    border-radius: 11px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 0.12s, box-shadow 0.12s;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+  }
+  .strategy-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+
+  /* Режим ТВ (?tv=1 в адресе) — крупнее шрифт и просторнее раскладка для просмотра издалека */
+  body.tv-mode { font-size: 17px; }
+  body.tv-mode .wrap { max-width: 1500px; gap: 26px; }
+  body.tv-mode .panel { padding: 26px 30px; }
+  body.tv-mode .panel h2 { font-size: 20px; }
+  body.tv-mode .panel .panel-sub { font-size: 15.5px; }
+  body.tv-mode header.top .title-block h1 { font-size: 30px; }
+  body.tv-mode header.top .title-block p { font-size: 16px; }
+  body.tv-mode .kpi .value { font-size: 34px; }
+  body.tv-mode .kpi .label { font-size: 13px; }
+  body.tv-mode .issue blockquote, body.tv-mode .issue p.desc { font-size: 15px; }
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="title-block">
+      <h1>Пресс-мониторинг АКК</h1>
+      <p>Редстандарт «Акорда style» · сайт koreans.kz · соцсети · с начала работы 10.08.2026</p>
+    </div>
+    <div class="meta">
+      <div class="run-date mono" id="run-date">—</div>
+      <div>обновление ежедневно, 08:00 (Алматы/Кызылорда)</div>
+    </div>
+  </header>
+
+  <section class="panel strategy-banner">
+    <div class="strategy-banner-inner">
+      <div>
+        <span class="chip new">Новое</span>
+        <h2>Стратегия соцсетей АКК: кейсы диаспор мира и план действий</h2>
+        <p class="panel-sub">Шесть кейсов (немцы Казахстана, Uyghur Collective, Hillel International, Jewish TikTok, архивы диаспоры, Агентство зарубежных корейцев) и пошаговый план на 30/60/90 дней — как поднять комментарии, перезапустить LinkedIn и выйти за пределы одного канала.</p>
+      </div>
+      <a class="strategy-btn" href="https://claude.ai/artifact/F8y8woJmbLfhDAsHk4UHZM" target="_blank" rel="noopener noreferrer">Открыть презентацию →</a>
+    </div>
+  </section>
+
+  <section class="kpi-row" id="kpi-row"></section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <h2>Нарушения редстандарта</h2>
+      <p class="panel-sub">Автоматическая проверка текста сайта по правилам «Акорда style»</p>
+      <div class="filter-bar" id="issues-filter"></div>
+      <div id="issues-list" class="ig-animated"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Открытые верификации</h2>
+      <p class="panel-sub">Факты и должности, ожидающие подтверждения</p>
+      <div id="verif-list"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Проверенные источники сегодня</h2>
+    <p class="panel-sub">Что агент реально смог прочитать в этом прогоне</p>
+    <div id="sources-list"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Упоминания руководства и Попечительского совета АКК</h2>
+    <p class="panel-sub" id="board-sub">По запросу Андрея: новости, где фигурируют члены руководства/Попечительского совета АКК — не только текст сайта</p>
+    <div id="board-list"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Что изменилось со вчера</h2>
+    <p class="panel-sub" id="diff-sub">Сравнение с предыдущим прогоном сайта</p>
+    <div class="filter-bar" id="diff-filter"></div>
+    <div class="diff-list ig-animated" id="diff-list"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Instagram — дашборд по датам</h2>
+    <p class="panel-sub" id="engagement-sub">Точные цифры из карточки «Статистика» каждого поста (профессиональная панель Instagram) — переключайте метрику и разбивку по времени, листайте посты, кликните на дату, чтобы открыть сам пост</p>
+
+    <div class="view-toggle-row" id="engagement-view-toggle"></div>
+
+    <div id="engagement-dashboard-view">
+      <div class="metric-toggle-row" id="ig-metric-buttons"></div>
+      <div class="view-toggle-row" id="ig-granularity-toggle" style="margin-bottom: 18px;"></div>
+      <div class="chart-wrap ig-animated" id="ig-chart"></div>
+      <div class="date-picker ig-animated" id="ig-date-picker"></div>
+      <div class="post-detail-card ig-animated" id="ig-detail"></div>
+    </div>
+
+    <div id="engagement-table-view" class="ig-animated" style="display:none;">
+      <div id="engagement-table" class="ig-animated"></div>
+    </div>
+
+    <h3 style="margin: 24px 0 12px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary);">Итоги за весь период</h3>
+    <div class="metric-grid" id="engagement-metrics"></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <h2>Reels против публикаций</h2>
+      <p class="panel-sub">Кто приносит охват, а кто — вовлечённость (30 дней)</p>
+      <div id="content-type-shares"></div>
+    </div>
+    <div class="panel">
+      <h2>Комментарии — слабое место</h2>
+      <p class="panel-sub">Лайки растут, разговор с аудиторией — нет</p>
+      <div class="comment-callouts" id="comment-callouts"></div>
+      <p class="desc" id="comment-note" style="font-size:12.5px; color:var(--text-secondary); margin:0;"></p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Топ постов периода</h2>
+    <p class="panel-sub">По точным данным карточки «Статистика», 22 июля — 15 сентября</p>
+    <div class="top-post-list" id="top-posts-list"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Сайт koreans.kz — Google Search Console</h2>
+    <p class="panel-sub" id="gsc-sub">Реальные данные из аккаунта Андрея (не оценка стороннего сервиса) — но только органический поиск, а не весь трафик сайта</p>
+    <div class="metric-grid" id="gsc-metrics"></div>
+    <div class="grid-2" style="margin-top:8px;">
+      <div>
+        <div class="share-block"><div class="share-title">Топ-запросы</div><div id="gsc-queries"></div></div>
+      </div>
+      <div>
+        <div class="share-block"><div class="share-title">Страны</div><div id="gsc-countries"></div></div>
+      </div>
+    </div>
+    <div class="share-block">
+      <div class="share-title">Индексация Google</div>
+      <div class="indexing-bar-wrap" id="indexing-bar"></div>
+      <div class="indexing-legend" id="indexing-legend"></div>
+    </div>
+    <div class="traffic-note" id="gsc-note"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Соцсети — снапшот по запросу</h2>
+    <p class="panel-sub" id="social-sub">Проверено вручную через браузер (не входит в автоматический прогон 08:00 — требует, чтобы компьютер был на связи)</p>
+    <div class="social-grid" id="social-grid"></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="placeholder-card">
+      <strong>План vs факт публикаций по каналам</strong>
+      Появится после подключения календаря контента (Google Drive) — это будет источником правды для регулярности публикаций по всем трём каналам.
+    </div>
+    <div class="placeholder-card">
+      <strong>Дедлайны и пустые слоты</strong>
+      Тоже появится вместе с календарём — как только файл будет подключён, здесь будут просроченные и незаполненные позиции.
+    </div>
+  </section>
+
+  <footer class="methodology">
+    <b>Как это устроено:</b> облачный агент не имеет прямого сетевого доступа к внешним сайтам, поэтому чтение koreans.kz идёт через инструмент получения веб-страниц, а не обычный скрапинг — отсюда разная надёжность источников. Статические страницы (например, K-PARK и главная) читаются полностью и надёжно. Раздел «Новости» использует клиентский JavaScript, и его список не виден автоматической проверке — используется поиск по индексу как приблизительная замена, но он может показывать устаревшие/неполные результаты. Правила редстандарта — детерминированные, без ИИ-интерпретации: одни и те же формулировки всегда дают один и тот же результат, но некоторые срабатывания (например, на слово «открытом» в бытовом контексте вроде «кинопоказы на открытом воздухе») могут быть ложными и требуют ручной проверки — это отмечено там, где применимо. Instagram и LinkedIn читаются через браузер на вашем компьютере в момент запроса (вы залогинены как админ/владелец) — это не часть ежедневного автопрогона, а снапшот "по кнопке", актуальный на момент проверки, указанный на карточке. Блоки «Instagram — дашборд по датам», «Reels против публикаций», «Комментарии» и «Топ постов» построены не по числу публикаций, а по точным цифрам из карточки «Статистика» каждого поста (профессиональная панель Instagram) — просмотры, лайки, комментарии, визиты в профиль и переходы по внешней ссылке, без округления. Дашборд Instagram можно смотреть по дням, неделям или месяцам (переключатель над графиком); клик на дату поста (со значком ↗) открывает сам пост в Instagram в новой вкладке — эти ссылки собраны вручную и могут не покрывать посты, добавленные после 17.09.2026. Данные о лайках/просмотрах предоставлены Андреем 16.09.2026; для обновления в следующий раз — открыть Instagram → Профессиональная панель → карточку «Статистика» под каждым новым постом. Таблица вовлечённости, разделы «Нарушения» и «Что изменилось со вчера» интерактивны: фильтры и сортировка по клику на заголовок колонки работают прямо в этой странице, без обращения к агенту — но не меняют исходные данные, только их отображение и группировку. Блок «Google Search Console» — тоже реальные данные из аккаунта Андрея, а не оценка стороннего сервиса, но это только органический поиск за последние 28 дней, а не весь трафик сайта. Google Analytics на koreans.kz по-прежнему не подключена. Для koreans.kz и LinkedIn история публикаций по датам недоступна автоматически.
+  </footer>
+
+</div>
+
+<script>
+  let issuesFilter = "all";
+  let diffFilter = "all";
+  let engagementState = { period: "all", sortKey: null, sortDir: -1 };
+  let engagementView = "dashboard";
+  let igMetric = "views";
+  let igGranularity = "day";
+  let igSelectedIndex = null;
+
+  const REPORT = {
+    run_date: "2026-09-23",
+    sources: [
+      { id: "kpark", label: "Страница K-PARK", url: "https://koreans.kz/kpark", status: "ok", note: "Текст снова слегка переписан между 22.09 и 23.09 — формулировка юбилея сменилась на «год 90-летия корейской общины страны», формулировка про открытие упростилась до «Открытие — 2027 год» (дважды в тексте). Оба старых срабатывания продолжают воспроизводиться." },
+      { id: "home", label: "Главная страница", url: "https://koreans.kz", status: "ok", note: "Прочитана полностью — нарушений редстандарта не найдено (без изменений с 16.09)" },
+      { id: "news_index", label: "Раздел «Новости»", url: "https://koreans.kz/news", status: "limited", note: "JS-контент, список не виден автоматически; поиск по индексу снова вернул только старые/устаревшие статьи" }
+    ],
+    issues: [
+      { source: "kpark", severity: "WARNING", rule: "Опережающая формулировка стадии (ложное срабатывание, проверено вручную)", quote: "Открытие — 2027 год", desc: "Правило срабатывает на корне «открыт-» в слове «Открытие» (сегодня встречается дважды в тексте страницы). Текст корректно использует плановую формулировку («Открытие — 2027 год»), это не нарушение. Правило намеренно не сужается без прямого запроса Андрея, поэтому продолжит шуметь на любое слово с этим корнем." },
+      { source: "kpark", severity: "WARNING", rule: "Унификация названия юбилея — вариант продолжает встречаться", quote: "год 90-летия корейской общины страны", desc: "Страница в очередной раз переписана — формулировка юбилея снова изменилась (было «90-летием корейской общины Казахстана» 22.09, стало «90-летия корейской общины страны» 23.09), но по-прежнему не дословно каноничная «90-летие корейцев Казахстана». Паттерн bad_variants, добавленный 22.09, продолжает её ловить. Готовая правка текста страницы: «Открытие — 2027 год, год 90-летия корейцев Казахстана»." },
+      { source: "instagram 18.08", severity: "CRITICAL", rule: "Иерархическое framing («благодарность»)", quote: "выразить благодарность казахскому народу, принявшему наших предков", desc: "То же нарушение, что и на странице K-PARK (там исправлено), найдено в реальном посте Instagram. Соцсети не перепроверялись в этом прогоне — данные от 16.09." },
+      { source: "instagram, 3 поста", severity: "WARNING", rule: "Унификация названия юбилея", quote: "«90-летию Казахстанских корейцев» / «90-летию проживания корейцев в Казахстане» / «90 лет этому событию» (1937)", desc: "Три разных поста называют один и тот же юбилей по-разному — ни разу дословно каноничной формулировкой. Соцсети не перепроверялись в этом прогоне — данные от 16.09." },
+      { source: "instagram 04.09", severity: "WARNING", rule: "Опережающая формулировка стадии", quote: "торжественном открытии K-PARK", desc: "K-PARK ещё строится (сдача — осень 2027), а пост уже говорит про «открытие». Соцсети не перепроверялись в этом прогоне — данные от 16.09." }
+    ],
+    verification: [
+      { person: "Тян Н.К.", issue: "Точная должность и инициалы не подтверждены", added: "14.09.2026" },
+      { person: "Мун М.А.", issue: "Роль в АКК не подтверждена", added: "14.09.2026" },
+      { person: "Ким А.И.", issue: "Указан руководителем проекта K-PARK, при этом А.С. Цхай также обозначен как project manager — соотношение ролей не уточнено", added: "14.09.2026" },
+      { person: "koreans.kz/kpark (текст страницы)", issue: "Ранее содержала формулировку о благодарности и увязку с депортацией — подтверждено отсутствие уже трижды подряд (18.09, 22.09, 23.09), но статус пункта не меняется автоматически: подтверждение должен дать Андрей", added: "14.09.2026" },
+      { person: "Цхай Юрий Андреевич", issue: "Расхождение титула между страницами сайта: koreans.kz/head называет его «Председатель АКК» (без оговорок), koreans.kz/prezid — «И.о. Председателя АКК». Не проверено, какой вариант актуален.", added: "22.09.2026" }
+    ],
+    diff: {
+      compared_to: "22.09.2026",
+      unresolved: [
+        "K-PARK: overclaiming_stage_language всё ещё срабатывает на корень «открыт-» — сегодня дважды на слове «Открытие»; при ручной проверке текст корректен (плановая формулировка «Открытие — 2027 год»), это не нарушение.",
+        "K-PARK: anniversary_naming_inconsistency всё ещё срабатывает — юбилей снова упомянут не каноничной формулировкой.",
+        "Верификации: 5 пунктов чек-листа (Тян Н.К., Мун М.А., Ким А.И./А.С. Цхай role conflict, kpark_page_gratitude_phrase, титул Ю.А. Цхая /head vs /prezid) — статус не менялся, ждут ответа Андрея.",
+        "Instagram: 3 нарушения из снапшота 16.09 (framing благодарности, разнобой в названии юбилея, «торжественное открытие») — соцсети не перепроверялись, статус не обновлялся.",
+        "Упоминания руководства/Попечительского совета: полный ежедневный обход всех 12 имён по-прежнему не встроен в автопрогон — блок ниже не обновлялся сегодня, показывает состояние на 22.09."
+      ],
+      new: [
+        "Ежедневный scheduled task пайплайна успешно отработал сегодня (23.09, ~03:13 UTC) — после сбоя 22.09 автоматизация, похоже, восстановилась (это первый успешный автозапуск с 17.09, судя по сохранённым снапшотам)."
+      ],
+      new_needs_review: [
+        "K-PARK: текст страницы в очередной раз слегка переписан (между 22.09 и 23.09) — формулировка юбилея сменилась с «90-летием корейской общины Казахстана» на «90-летия корейской общины страны», а формулировка про открытие упростилась с «Официальное открытие запланировано на 2027 год» до просто «Открытие — 2027 год» (встречается дважды). Оба старых срабатывания продолжают воспроизводиться на новых формулировках. Третья правка текста подряд за неделю — стоит, чтобы Андрей зафиксировал финальную версию как эталонную."
+      ],
+      fixed: []
+    },
+    board_mentions: {
+      updated_note: "Добавлено 22.09.2026 по запросу Андрея: отслеживать упоминания руководства и Попечительского совета АКК в новостях, а не только текст сайта. Полный список — 12 человек (config/board_members.yaml). Метод — точечный WebSearch по имени (тот же канал, что и для новостей сайта — прямого доступа к соцсетям/СМИ у агента нет). Ниже — состояние на 22.09.2026 (проверены 3 человека из руководства), сегодня блок не перепроверялся — обход всех 12 имён каждый день пока не решён с Андреем как отдельная задача.",
+      found: [
+        {
+          person: "Цхай Александра Сергеевна",
+          role: "Заместитель Председателя АКК",
+          headline: "Указом Президента РК утверждён состав Қазақстан Халық Кеңесі (126 человек) — А.С. Цхай включена под №119 как заместитель председателя РОО «Ассоциация казахстанских корейцев»",
+          date: "22.09.2026",
+          url: "https://www.akorda.kz/ru/ob-utverzhdenii-sostava-kazakstan-halyk-kenesi-2284344",
+          extra_note: "В официальном указе фамилия — «Цхай», не «Хай»."
+        }
+      ],
+      not_found_today: [
+        { person: "Цхай Юрий Андреевич", role: "Председатель АКК" },
+        { person: "Кан Джульетта Игоревна", role: "Руководитель Аппарата АКК" }
+      ],
+      not_checked_today: ["Кан Г.В.", "Ким В.А.", "Ким Л.М.", "Пя Ю.В.", "Ким Г.Н.", "Ким Р.У.", "Шин Б.С.", "Кан С.В.", "Ни Л.А."]
+    },
+    social: [
+      {
+        platform: "Instagram",
+        handle: "@koreans_in_kazakhstan",
+        checked_at: "16.09.2026, вручную через браузер",
+        stats: [
+          { n: "501", l: "постов" },
+          { n: "5 301", l: "подписчиков" },
+          { n: "69", l: "подписок" }
+        ],
+        latest: {
+          when: "7 часов назад (на 16.09)",
+          text: "Токаев на саммите «Корея — Центральная Азия» упомянул проекты АКК и K-PARK; 41 лайк, комментариев пока нет."
+        },
+        flag: "В тексте поста — «90-летию проживания корейцев в Казахстане» — ещё один вариант названия юбилея, отличный от канонического «90-летие корейцев Казахстана». Стоит унифицировать."
+      },
+      {
+        platform: "LinkedIn",
+        handle: "Ассоциация корейцев Казахстана",
+        checked_at: "16.09.2026, вручную через браузер",
+        stats: [
+          { n: "3K", l: "подписчиков" },
+          { n: "500+", l: "связей" }
+        ],
+        latest: {
+          when: "~8 месяцев назад",
+          text: "Последняя видимая активность — репост записи Yuriy Tskhay (итоги 35-летия АКК). Новых публикаций от имени страницы давно не было."
+        },
+        flag: "Страница оформлена как личный профиль LinkedIn («Join to view profile», «Message»), а не как официальная Company Page — соответствует открытому пункту «LinkedIn channel launch» из проекта Publication: канал по факту ещё не запущен по-настоящему."
+      }
+    ],
+    engagement: {
+      source: "Профессиональная панель Instagram, карточка «Статистика» каждого поста — точные цифры, не округлённые виджеты сводки. Предоставлено Андреем 16.09.2026.",
+      posts: [
+        { date: "22.07", type: "Публикация", before: true, views: 3401, likes: 57, comments: 0, profile_visits: 19, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/p/DbFyW6hDsIM/" },
+        { date: "28.07", type: "Reel*", before: true, views: 2460, likes: 61, comments: 3, profile_visits: 1, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/reel/DbU5lhot8Ex/" },
+        { date: "01.08", type: "Публикация", before: true, views: 3497, likes: 75, comments: 1, profile_visits: 10, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/p/DbfIjJ4jRjb/" },
+        { date: "12.08", type: "Публикация", before: false, views: 3712, likes: 98, comments: 0, profile_visits: 13, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/p/Db7WfueDR4w/" },
+        { date: "18.08", type: "Публикация", before: false, views: 4146, likes: 100, comments: 0, profile_visits: 29, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/p/DcLRUj9lMMW/" },
+        { date: "28.08", type: "Публикация", before: false, views: 3598, likes: 117, comments: 1, profile_visits: 43, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/p/Dck9A27lNoY/" },
+        { date: "04.09", type: "Публикация", before: false, views: 2656, likes: 64, comments: 0, profile_visits: 10, ext_clicks: 1, url: "https://www.instagram.com/koreans_in_kazakhstan/p/Dc3Hy0Qjhy-/" },
+        { date: "08.09", type: "Публикация", before: false, views: 3499, likes: 103, comments: 1, profile_visits: 23, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/p/DdBzL6uFFEr/" },
+        { date: "15.09", type: "Публикация", before: false, views: 3319, likes: 168, comments: 0, profile_visits: 29, ext_clicks: 0, url: "https://www.instagram.com/koreans_in_kazakhstan/p/DdTJ6_ojizk/" }
+      ],
+      note: "* Reel — просмотры считаются иначе, чем у карусели; для сопоставимости показаны отдельно в исходных данных, но включены в таблицу как есть.",
+      averages: [
+        { label: "Просмотры / пост", before: "3 119", after: "3 488", pct: "+12%", good: true },
+        { label: "Лайки / пост", before: "64,3", after: "108,3", pct: "+68%", good: true },
+        { label: "Вовлечённость / пост (лайки+репосты+сохр.+коммент.)", before: "68,3", after: "118,7", pct: "+74%", good: true },
+        { label: "Визиты в профиль / пост", before: "10,0", after: "24,5", pct: "+145%", good: true },
+        { label: "Комментарии / пост", before: "1,33", after: "0,33", pct: "−75%", good: false }
+      ]
+    },
+    content_type: {
+      views_share: [
+        { name: "Reels", value: 68.0 },
+        { name: "Истории", value: 24.1 },
+        { name: "Публикации", value: 8.0 }
+      ],
+      engagement_share: [
+        { name: "Публикации", value: 62.6 },
+        { name: "Reels", value: 30.1 },
+        { name: "Истории", value: 7.2 }
+      ],
+      note: "Просмотры приносят Reels (68%), а лайки/комментарии — обычные публикации (62,6%). Reels работают на охват, карусели — на разговор с аудиторией."
+    },
+    comment_stats: {
+      callouts: [
+        { value: "1,33→0,33", label: "комментариев на пост, первые 3 → последние 6 постов" },
+        { value: "6 из 9", label: "постов без единого комментария" },
+        { value: "0", label: "комментариев у 3 последних постов подряд (04, 08, 15.09)" }
+      ],
+      note: "Ни один из 9 постов периода не заканчивается вопросом или явным приглашением ответить — прямая причина того, что видно в цифрах. Рекомендация из анализа: закрывать пост предметным вопросом и отвечать на комментарии от лица АКК в течение суток."
+    },
+    top_posts: [
+      { badge: "Лучший результат периода", date: "15.09", quote: "Цитата Токаева в Сеуле: «более 100 тысяч корейцев живут в мире и согласии»", stats: "168 лайков · 179 взаимодействий · 3 319 просмотров · +3 подписчика" },
+      { badge: "Рекорд по визитам в профиль", date: "28.08", quote: "«Тен Ирина Сергеевна избрана депутатом нового Курултая!»", stats: "117 лайков · 138 взаимодействий · 43 визита в профиль (рекорд) · +2 подписчика" },
+      { badge: "Лучший охват (просмотры)", date: "18.08", quote: "Первое заседание Оргкомитета к 90-летию корейцев Казахстана", stats: "100 лайков · 4 146 просмотров (максимум периода) · 111 взаимодействий" },
+      { badge: "Стабильный протокольный формат", date: "08.09", quote: "АКК и Агентство экономического развития Пусана подписали меморандум", stats: "103 лайка · 111 взаимодействий · +2 подписчика" }
+    ],
+    search_console: {
+      period: "28 дней, 16.08 – 12.09.2026",
+      metrics: [
+        { label: "Клики", after: "291", pct: "+10%", good: true },
+        { label: "Показы", after: "4 130", pct: "+5%", good: true },
+        { label: "Средний CTR", after: "7%", pct: "", good: true },
+        { label: "Средняя позиция", after: "7,6", pct: "", good: true }
+      ],
+      queries: [
+        { q: "ассоциация корейцев казахстана", clicks: 36, pct: "−8%", good: false },
+        { q: "к парк", clicks: 20, pct: "+567%", good: true },
+        { q: "корейская диаспора в казахстане", clicks: 10, pct: "+400%", good: true },
+        { q: "k-park", clicks: 5, pct: "−17%", good: false },
+        { q: "k park", clicks: 2, pct: "−71%", good: false }
+      ],
+      countries: [
+        { name: "Казахстан", pct: 86 },
+        { name: "Юж. Корея", pct: 6 },
+        { name: "Россия", pct: 2 },
+        { name: "Кыргызстан", pct: 1 },
+        { name: "США", pct: 1 }
+      ],
+      indexed: 108,
+      not_indexed: 118,
+      note: "Google Analytics на koreans.kz по-прежнему не подключена (см. рекомендацию в раннбуке — узнать, под каким аккаунтом настроен GA на сайте) — поэтому нет прямой связки «переход из Instagram → визит на сайт», только косвенные признаки: рост брендовых запросов («к парк» +567%, «корейская диаспора в казахстане» +400%) синхронно с постами про K-PARK (18.08) и Пусан (04.09). Данные охватывают только последние 28 дней — более длинная динамика недоступна без Google Analytics. Также: 118 страниц сайта НЕ проиндексированы Google совсем — стоит проверить sitemap.xml и запросить переиндексацию; страница /head получила на 106% больше показов, чем обычно, — стоит проверить, с чем это связано."
+    }
+  };
+
+  function fmtRunDate(iso) {
+    try {
+      const [y, m, d] = iso.split("-");
+      return `${d}.${m}.${y}`;
+    } catch (e) { return iso; }
+  }
+
+  function renderKPIs() {
+    const critical = REPORT.issues.filter(i => i.severity === "CRITICAL").length;
+    const warning = REPORT.issues.filter(i => i.severity === "WARNING").length;
+    const verif = REPORT.verification.length;
+    const checked = REPORT.sources.filter(s => s.status === "ok").length;
+
+    const tiles = [
+      { label: "Критично", value: critical, cls: "critical", sub: "нарушений редстандарта" },
+      { label: "Предупреждения", value: warning, cls: "warning", sub: "формулировок на проверку" },
+      { label: "На верификации", value: verif, cls: "", sub: "фактов/должностей" },
+      { label: "Источников проверено", value: `${checked}/${REPORT.sources.length}`, cls: "good", sub: "полностью сегодня" }
+    ];
+
+    const row = document.getElementById("kpi-row");
+    row.innerHTML = tiles.map(t => `
+      <div class="kpi ${t.cls}">
+        <div class="label">${t.label}</div>
+        <div class="value mono">${t.value}</div>
+        <div class="sub">${t.sub}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderIssues() {
+    const counts = {
+      all: REPORT.issues.length,
+      critical: REPORT.issues.filter(i => i.severity === "CRITICAL").length,
+      warning: REPORT.issues.filter(i => i.severity === "WARNING").length
+    };
+    const filterDefs = [
+      { key: "all", label: `Все (${counts.all})` },
+      { key: "critical", label: `Критично (${counts.critical})` },
+      { key: "warning", label: `Проверить (${counts.warning})` }
+    ];
+    const filterBar = document.getElementById("issues-filter");
+    filterBar.innerHTML = filterDefs.map(f => `<button type="button" class="filter-btn ${issuesFilter === f.key ? 'active' : ''}" data-filter="${f.key}">${f.label}</button>`).join("");
+    filterBar.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (issuesFilter === btn.dataset.filter) return;
+        animateSwap(["issues-list"], () => { issuesFilter = btn.dataset.filter; renderIssues(); });
+      });
+    });
+
+    const list = document.getElementById("issues-list");
+    if (REPORT.issues.length === 0) {
+      list.innerHTML = `<p class="panel-sub">Нарушений не найдено.</p>`;
+      return;
+    }
+    const filtered = issuesFilter === "all" ? REPORT.issues : REPORT.issues.filter(i => i.severity.toLowerCase() === issuesFilter);
+    if (filtered.length === 0) {
+      list.innerHTML = `<p class="panel-sub">Нет нарушений в этой категории.</p>`;
+      return;
+    }
+    list.innerHTML = filtered.map(i => `
+      <div class="issue ${i.severity === 'WARNING' ? 'warning' : ''}">
+        <div class="issue-head">
+          <span class="chip ${i.severity === 'CRITICAL' ? 'critical' : 'warning'}">${i.severity === 'CRITICAL' ? 'Критично' : 'Проверить'}</span>
+          <span class="source-tag">${i.rule} · источник: ${i.source}</span>
+        </div>
+        <blockquote>«${i.quote}»</blockquote>
+        <p class="desc">${i.desc}</p>
+      </div>
+    `).join("");
+  }
+
+  function renderVerification() {
+    const list = document.getElementById("verif-list");
+    list.innerHTML = REPORT.verification.map(v => `
+      <div class="verif-item">
+        <div class="verif-dot"></div>
+        <div>
+          <div class="who">${v.person}</div>
+          <div class="what">${v.issue}</div>
+          <div class="added">добавлено ${v.added}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function renderSources() {
+    const list = document.getElementById("sources-list");
+    const statusMap = {
+      ok: { cls: "ok", label: "проверено" },
+      limited: { cls: "limited", label: "ограничено" },
+      pending: { cls: "pending", label: "не в этом прогоне" }
+    };
+    list.innerHTML = REPORT.sources.map(s => {
+      const st = statusMap[s.status] || statusMap.pending;
+      return `
+        <div class="source-row">
+          <div>
+            <div class="label">${s.label}</div>
+            <div class="note">${s.url} — ${s.note}</div>
+          </div>
+          <span class="status-badge ${st.cls}">${st.label}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderBoardMentions() {
+    const bm = REPORT.board_mentions;
+    if (!bm) return;
+    document.getElementById("board-sub").textContent = bm.updated_note;
+    const rows = [];
+    (bm.found || []).forEach(f => {
+      rows.push(`
+        <div class="diff-item new">
+          <span class="diff-text"><b>${f.person}</b> (${f.role}) — ${f.date}: ${f.headline}${f.extra_note ? ` <span style="color:var(--text-muted);">— ${f.extra_note}</span>` : ""} ${f.url ? `<a href="${f.url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">источник ↗</a>` : ""}</span>
+        </div>
+      `);
+    });
+    (bm.not_found_today || []).forEach(n => {
+      rows.push(`
+        <div class="diff-item unchanged">
+          <span class="diff-text"><b>${n.person}</b> (${n.role}) — новых упоминаний сегодня не найдено</span>
+        </div>
+      `);
+    });
+    const list = document.getElementById("board-list");
+    list.innerHTML = rows.join("") + (bm.not_checked_today && bm.not_checked_today.length
+      ? `<p class="desc" style="margin-top:10px;">Сегодня не проверялись (полный обход всех 12 имён пока не в ежедневном автопрогоне): ${bm.not_checked_today.join(", ")}.</p>`
+      : "");
+  }
+
+  function renderDiff() {
+    const d = REPORT.diff;
+    document.getElementById("diff-sub").textContent = `Сравнение с прогоном от ${d.compared_to}`;
+    const allRows = [];
+    d.fixed.forEach(t => allRows.push({ cls: "fixed", label: "Исправлено", text: t, cat: "new" }));
+    d.new.forEach(t => allRows.push({ cls: "new", label: "Новое", text: t, cat: "new" }));
+    d.new_needs_review.forEach(t => allRows.push({ cls: "new", label: "Новое (на проверку)", text: t, cat: "new" }));
+    d.unresolved.forEach(t => allRows.push({ cls: "unchanged", label: "Без изменений", text: t, cat: "unresolved" }));
+
+    const counts = {
+      all: allRows.length,
+      new: allRows.filter(r => r.cat === "new").length,
+      unresolved: allRows.filter(r => r.cat === "unresolved").length
+    };
+    const filterDefs = [
+      { key: "all", label: `Все (${counts.all})` },
+      { key: "new", label: `Новое (${counts.new})` },
+      { key: "unresolved", label: `Без изменений (${counts.unresolved})` }
+    ];
+    const filterBar = document.getElementById("diff-filter");
+    filterBar.innerHTML = filterDefs.map(f => `<button type="button" class="filter-btn ${diffFilter === f.key ? 'active' : ''}" data-filter="${f.key}">${f.label}</button>`).join("");
+    filterBar.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (diffFilter === btn.dataset.filter) return;
+        animateSwap(["diff-list"], () => { diffFilter = btn.dataset.filter; renderDiff(); });
+      });
+    });
+
+    const list = document.getElementById("diff-list");
+    const rows = diffFilter === "all" ? allRows : allRows.filter(r => r.cat === diffFilter);
+    if (rows.length === 0) {
+      list.innerHTML = `<p class="panel-sub">Нет данных для сравнения.</p>`;
+      return;
+    }
+    list.innerHTML = rows.map(r => `
+      <div class="diff-item ${r.cls}">
+        <span class="diff-text"><b>${r.label}:</b> ${r.text}</span>
+      </div>
+    `).join("");
+  }
+
+  function pctClass(good) { return good ? "good" : "bad"; }
+
+  const MONTHS_FULL = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+  const MONTHS_SHORT = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+  function parseIgDate(dateStr) {
+    const [d, m] = dateStr.split(".").map(Number);
+    return new Date(2026, m - 1, d);
+  }
+
+  function animateSwap(elIds, updateFn) {
+    const els = elIds.map(id => document.getElementById(id)).filter(Boolean);
+    els.forEach(el => el.classList.add("fading"));
+    setTimeout(() => {
+      updateFn();
+      els.forEach(el => el.classList.remove("fading"));
+    }, 220);
+  }
+
+  function postLinkHtml(post, label) {
+    if (!post.url) return label;
+    return `<a class="post-link" href="${post.url}" target="_blank" rel="noopener noreferrer" title="Открыть пост в Instagram">${label}<span class="post-link-icon">↗</span></a>`;
+  }
+
+  const IG_METRICS = [
+    { key: "views", label: "Просмотры" },
+    { key: "likes", label: "Лайки" },
+    { key: "comments", label: "Комментарии" },
+    { key: "profile_visits", label: "Визиты в профиль" },
+    { key: "ext_clicks", label: "Переходы по ссылке" }
+  ];
+
+  const IG_GRANULARITIES = [
+    { key: "day", label: "По дням" },
+    { key: "week", label: "По неделям" },
+    { key: "month", label: "По месяцам" }
+  ];
+
+  function getIgGroups(granularity) {
+    const posts = [...REPORT.engagement.posts].sort((a, b) => parseIgDate(a.date) - parseIgDate(b.date));
+    if (granularity === "day") {
+      return posts.map(p => ({ key: p.date, label: p.date, posts: [p] }));
+    }
+    const map = new Map();
+    posts.forEach(p => {
+      const d = parseIgDate(p.date);
+      let key, label;
+      if (granularity === "week") {
+        const day = d.getDay();
+        const diffToMonday = (day + 6) % 7;
+        const monday = new Date(d); monday.setDate(d.getDate() - diffToMonday);
+        const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+        key = monday.toISOString().slice(0, 10);
+        label = `${monday.getDate()}–${sunday.getDate()} ${MONTHS_SHORT[sunday.getMonth()]}`;
+      } else {
+        key = `${d.getFullYear()}-${d.getMonth()}`;
+        label = MONTHS_FULL[d.getMonth()];
+      }
+      if (!map.has(key)) map.set(key, { key, label, posts: [] });
+      map.get(key).posts.push(p);
+    });
+    return [...map.values()].sort((a, b) => parseIgDate(a.posts[0].date) - parseIgDate(b.posts[0].date));
+  }
+
+  function groupMetricSum(group, key) {
+    return group.posts.reduce((s, p) => s + p[key], 0);
+  }
+
+  function renderEngagementViewToggle() {
+    const toggles = [
+      { key: "dashboard", label: "Дашборд по датам" },
+      { key: "table", label: "Таблица" }
+    ];
+    const bar = document.getElementById("engagement-view-toggle");
+    bar.innerHTML = toggles.map(t => `<button type="button" class="big-btn ${engagementView === t.key ? 'active' : ''}" data-view="${t.key}">${t.label}</button>`).join("");
+    bar.querySelectorAll(".big-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (engagementView === btn.dataset.view) return;
+        animateSwap(["engagement-dashboard-view", "engagement-table-view"], () => {
+          engagementView = btn.dataset.view;
+          renderEngagementViewToggle();
+          document.getElementById("engagement-dashboard-view").style.display = engagementView === "dashboard" ? "" : "none";
+          document.getElementById("engagement-table-view").style.display = engagementView === "table" ? "" : "none";
+        });
+      });
+    });
+  }
+
+  function renderIgMetricButtons() {
+    const bar = document.getElementById("ig-metric-buttons");
+    bar.innerHTML = IG_METRICS.map(m => `<button type="button" class="big-btn ${igMetric === m.key ? 'active' : ''}" data-metric="${m.key}">${m.label}</button>`).join("");
+    bar.querySelectorAll(".big-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (igMetric === btn.dataset.metric) return;
+        igMetric = btn.dataset.metric;
+        renderIgMetricButtons();
+        animateSwap(["ig-chart", "ig-detail"], () => { renderIgChart(); renderIgDetail(); });
+      });
+    });
+  }
+
+  function renderIgGranularityToggle() {
+    const bar = document.getElementById("ig-granularity-toggle");
+    bar.innerHTML = IG_GRANULARITIES.map(g => `<button type="button" class="big-btn ${igGranularity === g.key ? 'active' : ''}" data-gran="${g.key}">${g.label}</button>`).join("");
+    bar.querySelectorAll(".big-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (igGranularity === btn.dataset.gran) return;
+        animateSwap(["ig-chart", "ig-date-picker", "ig-detail"], () => {
+          igGranularity = btn.dataset.gran;
+          igSelectedIndex = getIgGroups(igGranularity).length - 1;
+          renderIgGranularityToggle();
+          renderIgChart();
+          renderIgDatePicker();
+          renderIgDetail();
+        });
+      });
+    });
+  }
+
+  function renderIgChart() {
+    const groups = getIgGroups(igGranularity);
+    const maxVal = Math.max(...groups.map(g => groupMetricSum(g, igMetric)));
+    let html = "";
+    groups.forEach((g, idx) => {
+      const val = groupMetricSum(g, igMetric);
+      const pct = maxVal > 0 ? Math.max((val / maxVal) * 100, 3) : 3;
+      const displayVal = igMetric === "views" ? val.toLocaleString("ru-RU") : val;
+      html += `
+        <div class="chart-bar-col ${idx === igSelectedIndex ? 'selected' : ''}" data-idx="${idx}">
+          <div class="chart-bar-value">${displayVal}</div>
+          <div class="chart-bar" style="height:${pct}%"></div>
+          <div class="chart-bar-label">${g.label}</div>
+        </div>
+      `;
+    });
+    const wrap = document.getElementById("ig-chart");
+    wrap.innerHTML = html;
+    wrap.querySelectorAll(".chart-bar-col").forEach(col => {
+      col.addEventListener("click", () => {
+        const idx = parseInt(col.dataset.idx, 10);
+        if (idx === igSelectedIndex) return;
+        animateSwap(["ig-chart", "ig-date-picker", "ig-detail"], () => {
+          igSelectedIndex = idx;
+          renderIgChart();
+          renderIgDatePicker();
+          renderIgDetail();
+        });
+      });
+    });
+  }
+
+  function renderIgDatePicker() {
+    const groups = getIgGroups(igGranularity);
+    const picker = document.getElementById("ig-date-picker");
+    picker.innerHTML = groups.map((g, idx) => {
+      const singlePost = g.posts.length === 1 ? g.posts[0] : null;
+      const dateHtml = singlePost ? postLinkHtml(singlePost, g.label) : g.label;
+      const subLabel = g.posts.length > 1 ? `${g.posts.length} поста` : (singlePost.type === 'Reel*' ? 'Reel' : 'Пост');
+      return `
+        <div class="date-chip ${idx === igSelectedIndex ? 'active' : ''}" data-idx="${idx}">
+          <div class="dc-date">${dateHtml}</div>
+          <div class="dc-type">${subLabel}</div>
+        </div>
+      `;
+    }).join("");
+    picker.querySelectorAll(".date-chip").forEach(chip => {
+      chip.addEventListener("click", (e) => {
+        if (e.target.closest("a")) return;
+        const idx = parseInt(chip.dataset.idx, 10);
+        if (idx === igSelectedIndex) return;
+        animateSwap(["ig-chart", "ig-date-picker", "ig-detail"], () => {
+          igSelectedIndex = idx;
+          renderIgChart();
+          renderIgDatePicker();
+          renderIgDetail();
+        });
+      });
+    });
+  }
+
+  function renderIgDetail() {
+    const groups = getIgGroups(igGranularity);
+    const g = groups[igSelectedIndex];
+    const prevGroup = igSelectedIndex > 0 ? groups[igSelectedIndex - 1] : null;
+    const isSingle = g.posts.length === 1;
+
+    const tiles = IG_METRICS.map(s => {
+      const val = groupMetricSum(g, s.key);
+      let deltaHtml;
+      if (prevGroup) {
+        const prevVal = groupMetricSum(prevGroup, s.key);
+        if (prevVal > 0) {
+          const deltaPct = Math.round((val - prevVal) / prevVal * 100);
+          const cls = deltaPct >= 0 ? "good" : "bad";
+          const prevLabel = igGranularity === "day" ? "к пред. посту" : (igGranularity === "week" ? "к пред. неделе" : "к пред. месяцу");
+          deltaHtml = `<span class="bs-delta ${cls}">${deltaPct >= 0 ? '+' : ''}${deltaPct}% ${prevLabel}</span>`;
+        } else {
+          deltaHtml = `<span class="bs-delta neutral">нет данных для сравнения</span>`;
+        }
+      } else {
+        deltaHtml = `<span class="bs-delta neutral">первый период в выборке</span>`;
+      }
+      const displayVal = s.key === "views" ? val.toLocaleString("ru-RU") : val;
+      const avgNote = !isSingle ? `<div class="bs-avg">в среднем ${(val / g.posts.length).toFixed(1).replace(".", ",")} за пост</div>` : "";
+      return `
+        <div class="big-stat-tile">
+          <div class="bs-value mono">${displayVal}</div>
+          <div class="bs-label">${s.label}</div>
+          ${avgNote}
+          ${deltaHtml}
+        </div>
+      `;
+    }).join("");
+
+    const singlePost = isSingle ? g.posts[0] : null;
+    const titleHtml = singlePost ? postLinkHtml(singlePost, `${g.label}.2026`) : g.label;
+    const typeChip = singlePost
+      ? `<span class="chip info">${singlePost.type === 'Reel*' ? 'Reel' : 'Публикация'}</span>`
+      : `<span class="chip info">${g.posts.length} постов</span>`;
+    const groupPostsHtml = !isSingle
+      ? `<div class="ig-group-posts">${g.posts.map(p => `<span class="ig-group-post-chip">${postLinkHtml(p, p.date)}</span>`).join("")}</div>`
+      : "";
+
+    const detail = document.getElementById("ig-detail");
+    detail.innerHTML = `
+      <div class="post-detail-head">
+        <button type="button" class="nav-arrow-btn" id="ig-prev" ${igSelectedIndex === 0 ? "disabled" : ""}>‹</button>
+        <div class="pd-title">
+          <span class="pd-date mono">${titleHtml}</span>
+          ${typeChip}
+        </div>
+        <button type="button" class="nav-arrow-btn" id="ig-next" ${igSelectedIndex === groups.length - 1 ? "disabled" : ""}>›</button>
+      </div>
+      ${groupPostsHtml}
+      <div class="big-stat-grid">${tiles}</div>
+    `;
+
+    document.getElementById("ig-prev").addEventListener("click", () => {
+      if (igSelectedIndex > 0) {
+        animateSwap(["ig-chart", "ig-date-picker", "ig-detail"], () => {
+          igSelectedIndex--;
+          renderIgChart(); renderIgDatePicker(); renderIgDetail();
+        });
+      }
+    });
+    document.getElementById("ig-next").addEventListener("click", () => {
+      const groups2 = getIgGroups(igGranularity);
+      if (igSelectedIndex < groups2.length - 1) {
+        animateSwap(["ig-chart", "ig-date-picker", "ig-detail"], () => {
+          igSelectedIndex++;
+          renderIgChart(); renderIgDatePicker(); renderIgDetail();
+        });
+      }
+    });
+  }
+
+  function renderEngagementTable() {
+    const posts = [...REPORT.engagement.posts].sort((a, b) => parseIgDate(a.date) - parseIgDate(b.date));
+    const sortCols = [
+      { key: "views", label: "Просмотры" },
+      { key: "likes", label: "Лайки" },
+      { key: "comments", label: "Коммент." },
+      { key: "profile_visits", label: "Визиты в профиль" },
+      { key: "ext_clicks", label: "Внеш. ссылка" }
+    ];
+    const arrowFor = (key) => engagementState.sortKey === key ? `<span class="sort-arrow">${engagementState.sortDir === 1 ? "▲" : "▼"}</span>` : "";
+    let rows = [...posts];
+    if (engagementState.sortKey) {
+      const k = engagementState.sortKey;
+      rows.sort((a, b) => (a[k] - b[k]) * engagementState.sortDir);
+    }
+
+    const row = (p) => `
+      <tr>
+        <td class="rowlabel">${postLinkHtml(p, p.date)} <span style="color:var(--text-muted); font-size:10.5px;">${p.type === 'Reel*' ? 'Reel*' : ''}</span></td>
+        <td>${p.views.toLocaleString('ru-RU')}</td>
+        <td>${p.likes}</td>
+        <td>${p.comments}</td>
+        <td>${p.profile_visits}</td>
+        <td>${p.ext_clicks}</td>
+      </tr>
+    `;
+
+    const headRow = `<tr><th>Дата</th>${sortCols.map(c => `<th class="sortable" data-sort="${c.key}">${c.label}${arrowFor(c.key)}</th>`).join("")}</tr>`;
+    const table = `
+      <table class="data-table">
+        <thead>${headRow}</thead>
+        <tbody>${rows.map(row).join("")}</tbody>
+      </table>
+    `;
+    document.getElementById("engagement-table").innerHTML = table;
+    document.querySelectorAll("#engagement-table th.sortable").forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        animateSwap(["engagement-table"], () => {
+          if (engagementState.sortKey === key) {
+            engagementState.sortDir *= -1;
+          } else {
+            engagementState.sortKey = key;
+            engagementState.sortDir = -1;
+          }
+          renderEngagementTable();
+        });
+      });
+    });
+  }
+
+  function renderEngagementAverages() {
+    const posts = REPORT.engagement.posts;
+    const n = posts.length;
+    const totalViews = posts.reduce((s, p) => s + p.views, 0);
+    const totalLikes = posts.reduce((s, p) => s + p.likes, 0);
+    const totalComments = posts.reduce((s, p) => s + p.comments, 0);
+    const totalVisits = posts.reduce((s, p) => s + p.profile_visits, 0);
+    const cards = [
+      { label: "Постов в выборке", value: n },
+      { label: "Всего просмотров", value: totalViews.toLocaleString("ru-RU") },
+      { label: "Среднее лайков / пост", value: (totalLikes / n).toFixed(1).replace(".", ",") },
+      { label: "Среднее вовлечённости / пост", value: ((totalLikes + totalComments) / n).toFixed(1).replace(".", ",") },
+      { label: "Визитов в профиль всего", value: totalVisits },
+      { label: "Комментариев всего", value: totalComments }
+    ];
+    document.getElementById("engagement-metrics").innerHTML = cards.map(c => `
+      <div class="metric-card">
+        <div class="m-label">${c.label}</div>
+        <div class="m-flow">${c.value}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderEngagement() {
+    if (igSelectedIndex === null) igSelectedIndex = getIgGroups(igGranularity).length - 1;
+    renderEngagementViewToggle();
+    renderIgMetricButtons();
+    renderIgGranularityToggle();
+    renderIgChart();
+    renderIgDatePicker();
+    renderIgDetail();
+    renderEngagementTable();
+    renderEngagementAverages();
+  }
+
+  function renderContentType() {
+    const colors = { "Reels": "var(--accent)", "Истории": "var(--text-muted)", "Публикации": "var(--good)" };
+    function block(title, items) {
+      return `
+        <div class="share-block">
+          <div class="share-title">${title}</div>
+          ${items.map(i => `
+            <div class="share-row">
+              <div class="share-name">${i.name}</div>
+              <div class="share-track"><div class="share-fill" style="width:${i.value}%; background:${colors[i.name] || 'var(--accent)'}"></div></div>
+              <div class="share-val">${i.value}%</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+    document.getElementById("content-type-shares").innerHTML =
+      block("Доля просмотров", REPORT.content_type.views_share) +
+      block("Доля вовлечённости", REPORT.content_type.engagement_share) +
+      `<p class="desc" style="margin-top:8px;">${REPORT.content_type.note}</p>`;
+  }
+
+  function renderCommentStats() {
+    document.getElementById("comment-callouts").innerHTML = REPORT.comment_stats.callouts.map(c => `
+      <div class="cstat">
+        <div class="c-value mono">${c.value}</div>
+        <div class="c-label">${c.label}</div>
+      </div>
+    `).join("");
+    document.getElementById("comment-note").textContent = REPORT.comment_stats.note;
+  }
+
+  function renderTopPosts() {
+    document.getElementById("top-posts-list").innerHTML = REPORT.top_posts.map(p => `
+      <div class="top-post-card">
+        <div class="tp-head">
+          <span class="tp-badge">${p.badge}</span>
+          <span class="tp-date mono">${p.date}.2026</span>
+        </div>
+        <div class="tp-quote">${p.quote}</div>
+        <div class="tp-stats">${p.stats}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderSearchConsole() {
+    const sc = REPORT.search_console;
+    document.getElementById("gsc-sub").textContent =
+      `Реальные данные из аккаунта Андрея (не оценка стороннего сервиса) — период: ${sc.period}`;
+
+    document.getElementById("gsc-metrics").innerHTML = sc.metrics.map(m => `
+      <div class="metric-card">
+        <div class="m-label">${m.label}</div>
+        <div class="m-flow">${m.after}</div>
+        ${m.pct ? `<div class="m-pct ${pctClass(m.good)}">${m.pct}</div>` : ""}
+      </div>
+    `).join("");
+
+    document.getElementById("gsc-queries").innerHTML = sc.queries.map(q => `
+      <div class="share-row">
+        <div class="share-name" style="flex:1 1 auto;">«${q.q}»</div>
+        <div class="share-val" style="flex:0 0 34px;">${q.clicks}</div>
+        <div class="pct ${pctClass(q.good)}" style="flex:0 0 54px; text-align:right;">${q.pct}</div>
+      </div>
+    `).join("");
+
+    document.getElementById("gsc-countries").innerHTML = sc.countries.map(c => `
+      <div class="share-row">
+        <div class="share-name">${c.name}</div>
+        <div class="share-track"><div class="share-fill" style="width:${c.pct}%; background:var(--accent)"></div></div>
+        <div class="share-val">${c.pct}%</div>
+      </div>
+    `).join("");
+
+    const total = sc.indexed + sc.not_indexed;
+    document.getElementById("indexing-bar").innerHTML =
+      `<div class="seg-ok" style="width:${(sc.indexed/total*100).toFixed(0)}%"></div><div class="seg-bad" style="width:${(sc.not_indexed/total*100).toFixed(0)}%"></div>`;
+    document.getElementById("indexing-legend").innerHTML =
+      `<span><span class="dot" style="background:var(--good);"></span>Проиндексировано: ${sc.indexed}</span>
+       <span><span class="dot" style="background:var(--text-muted); opacity:0.5;"></span>Не проиндексировано: ${sc.not_indexed}</span>`;
+
+    document.getElementById("gsc-note").textContent = sc.note;
+  }
+
+  function renderSocial() {
+    const grid = document.getElementById("social-grid");
+    grid.innerHTML = REPORT.social.map(s => `
+      <div class="social-card">
+        <div class="social-card-head">
+          <span class="platform">${s.platform} · ${s.handle}</span>
+        </div>
+        <div class="social-stats">
+          ${s.stats.map(st => `<div class="social-stat"><div class="n mono">${st.n}</div><div class="l">${st.l}</div></div>`).join("")}
+        </div>
+        <div class="social-latest">
+          <div class="when">${s.latest.when} · проверено ${s.checked_at}</div>
+          ${s.latest.text}
+        </div>
+        ${s.flag ? `<div class="social-flag">${s.flag}</div>` : ""}
+      </div>
+    `).join("");
+  }
+
+  document.getElementById("run-date").textContent = fmtRunDate(REPORT.run_date);
+  renderKPIs();
+  renderIssues();
+  renderVerification();
+  renderSources();
+  renderBoardMentions();
+  renderDiff();
+  renderSocial();
+  renderEngagement();
+  renderContentType();
+  renderCommentStats();
+  renderTopPosts();
+  renderSearchConsole();
+
+  // ---- Режим ТВ: крупный шрифт + медленная авто-прокрутка с зацикливанием ----
+  // Эта копия дашборда (на Netlify) сделана специально для показа на ТВ,
+  // поэтому режим включён ПО УМОЛЧАНИЮ — чтобы отключить его на этой копии
+  // (например, для отладки с ноутбука), открыть с ?tv=0.
+  (function initTvMode() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tv") === "0") return;
+
+    document.body.classList.add("tv-mode");
+
+    const SCROLL_SPEED_PX_PER_SEC = 38;   // скорость прокрутки вниз
+    const PAUSE_AT_BOTTOM_MS = 7000;      // пауза внизу перед возвратом наверх
+    const PAUSE_AT_TOP_MS = 4000;         // пауза наверху перед стартом
+    const SCROLL_TO_TOP_MS = 1600;        // длительность анимированного возврата наверх
+
+    let programmatic = false;   // true пока скролл двигаем мы сами (чтобы не спутать с реальным вводом)
+    let paused = false;         // true, если реальный пользователь взаимодействовал со страницей
+    let phase = "pause-top";    // "pause-top" | "scroll-down" | "pause-bottom" | "scroll-up"
+    let phaseStart = performance.now();
+    let scrollStartY = 0;
+
+    function maxScroll() {
+      return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    }
+
+    function onUserInteraction() {
+      if (programmatic) return;
+      // Реальное взаимодействие (пульт/тач/клавиатура/колесо) — приостанавливаем автопрокрутку насовсем,
+      // чтобы не бороться с пользователем. Обычно на ТВ это взаимодействие не ожидается.
+      paused = true;
+    }
+    ["wheel", "touchstart", "keydown", "pointerdown"].forEach(evt => {
+      window.addEventListener(evt, onUserInteraction, { passive: true });
+    });
+
+    function setScroll(y) {
+      programmatic = true;
+      window.scrollTo(0, y);
+      // сбрасываем флаг сразу после кадра, в котором произошёл скролл
+      requestAnimationFrame(() => { programmatic = false; });
+    }
+
+    function tick(now) {
+      if (paused) { requestAnimationFrame(tick); return; }
+      const elapsed = now - phaseStart;
+      const max = maxScroll();
+
+      if (max <= 0) {
+        // страница короче экрана — просто ничего не делаем
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      if (phase === "pause-top") {
+        if (elapsed >= PAUSE_AT_TOP_MS) {
+          phase = "scroll-down";
+          phaseStart = now;
+        }
+      } else if (phase === "scroll-down") {
+        const y = Math.min(max, (elapsed / 1000) * SCROLL_SPEED_PX_PER_SEC);
+        setScroll(y);
+        if (y >= max) {
+          phase = "pause-bottom";
+          phaseStart = now;
+        }
+      } else if (phase === "pause-bottom") {
+        if (elapsed >= PAUSE_AT_BOTTOM_MS) {
+          phase = "scroll-up";
+          phaseStart = now;
+          scrollStartY = window.scrollY;
+        }
+      } else if (phase === "scroll-up") {
+        const t = Math.min(1, elapsed / SCROLL_TO_TOP_MS);
+        // плавное ease-out
+        const eased = 1 - Math.pow(1 - t, 3);
+        setScroll(scrollStartY * (1 - eased));
+        if (t >= 1) {
+          phase = "pause-top";
+          phaseStart = now;
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  })();
+</script>
+
+</body></html>le-touch-icon/meta tags — belt and suspenders). -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#16213E">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
