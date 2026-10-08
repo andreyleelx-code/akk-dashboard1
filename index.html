@@ -565,7 +565,7 @@
 (function(){
   var FIREBASE_CONFIG = {"apiKey": "AIzaSyCBdkZrB83XPcmxY9xhPTRHT9py0KT8ExM", "authDomain": "assosiation-45784.firebaseapp.com", "projectId": "assosiation-45784", "storageBucket": "assosiation-45784.firebasestorage.app", "messagingSenderId": "1015320794110", "appId": "1:1015320794110:web:884ca6db4cb2f5ec4366af", "measurementId": "G-3GG3VJVP79"};
   var CLOUDINARY = { cloud_name: "gptmnxzl", upload_preset: "AKK upload" };
-  var GEMINI_MODEL = 'gemini-flash-latest';
+  var GEMINI_MODEL = 'gemini-flash-lite-latest';
   var GEMINI_KEY_STORAGE = 'akk_gemini_key';
 
   firebase.initializeApp(FIREBASE_CONFIG);
@@ -600,7 +600,8 @@
 
   function roleToGemini(r){ return r==='assistant' ? 'model' : 'user'; }
 
-  function callGemini(body){
+  function callGemini(body, _attempt){
+    _attempt = _attempt || 0;
     var key = getGeminiKey();
     if(!key){ var ek = new Error('no Gemini key stored'); ek.code = 'no_key'; return Promise.reject(ek); }
     return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(key), {
@@ -610,9 +611,17 @@
         if(!res.ok){
           var msg = (res.json && res.json.error && res.json.error.message) || 'Gemini error';
           var status = res.json && res.json.error && res.json.error.status;
+          // The model is occasionally briefly overloaded (503 UNAVAILABLE) —
+          // that's transient, so retry a couple of times with backoff before
+          // giving up and surfacing an error to the user.
+          if(status==='UNAVAILABLE' && _attempt<2){
+            return new Promise(function(resolve){ setTimeout(resolve, 900*(_attempt+1)); })
+              .then(function(){ return callGemini(body, _attempt+1); });
+          }
           var e = new Error(msg);
           if(res.status===401 || res.status===400 && status==='INVALID_ARGUMENT'){ e.code = 'bad_key'; setGeminiKey(''); }
           else if(status==='RESOURCE_EXHAUSTED'){ e.code = 'rate_limited'; }
+          else if(status==='UNAVAILABLE'){ e.code = 'overloaded'; }
           else { e.code = 'error'; }
           throw e;
         }
@@ -794,6 +803,12 @@
   var contactsView = 'list';       // 'list' | 'assistant'
   var chatHistory = [];            // [{role:'user'|'assistant', text, actions?}]
   var chatBusy = false;
+  var chatNeedsGeminiKey = false;  // true when the assistant hit a missing/bad Gemini key
+  var chatKeyReason = '';
+  var chatRetryText = '';
+  var micSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  var micRecognition = null;
+  var micListening = false;
 
   var todayISO = isoDate(new Date());
 
@@ -1865,7 +1880,7 @@
 
     var hint = document.createElement('p');
     hint.style.cssText = 'margin:0;font-size:12px;color:var(--ink-dim);';
-    hint.textContent = 'Голос — через диктовку устройства (значок микрофона на клавиатуре телефона, Win+H на Windows, дважды Fn на Mac): надиктуйте в поле ниже, при необходимости поправьте текст и отправьте. Например: «поставь Джульетте задачу на пятницу — отвезти документы», «найди контакт Иван», «отметь, что Светлана Ким — с форума Digital Bridge 2026», «напиши письмо Ивану, что встреча переносится на завтра».';
+    hint.textContent = (micSupported ? 'Нажмите 🎤 и продиктуйте команду голосом — распознаётся прямо в браузере, либо ' : 'Голос — ') + 'через диктовку устройства (значок микрофона на клавиатуре телефона, Win+H на Windows, дважды Fn на Mac): надиктуйте в поле ниже, при необходимости поправьте текст и отправьте. Например: «поставь Джульетте задачу на пятницу — отвезти документы», «найди контакт Иван», «отметь, что Светлана Ким — с форума Digital Bridge 2026», «напиши письмо Ивану, что встреча переносится на завтра».';
     box.appendChild(hint);
 
     var log = document.createElement('div');
@@ -1886,16 +1901,37 @@
 
     var inputRow = document.createElement('div');
     inputRow.className = 'quickadd';
-    inputRow.innerHTML = '<input type="text" id="chatInput" placeholder="Нажмите и продиктуйте или напишите команду…"><button id="chatSendBtn">➤</button>';
+    inputRow.innerHTML = '<input type="text" id="chatInput" placeholder="Нажмите и продиктуйте или напишите команду…">' +
+      (micSupported ? '<button type="button" id="chatMicBtn" class="btn sm'+(micListening?' primary':' ghost')+'" title="Голосовой ввод" style="flex:0 0 auto;">'+(micListening?'⏺':'🎤')+'</button>' : '') +
+      '<button id="chatSendBtn">➤</button>';
     box.appendChild(inputRow);
 
     var sendBtn = inputRow.querySelector('#chatSendBtn');
     var inputEl = inputRow.querySelector('#chatInput');
-    if(chatBusy){ sendBtn.disabled = true; inputEl.disabled = true; }
-    sendBtn.addEventListener('click', submitChat);
+    var micBtn = inputRow.querySelector('#chatMicBtn');
+    if(chatBusy){ sendBtn.disabled = true; inputEl.disabled = true; if(micBtn) micBtn.disabled = true; }
+    sendBtn.addEventListener('click', function(){ submitChat(); });
     inputEl.addEventListener('keydown', function(ev){ if(ev.key==='Enter') submitChat(); });
+    if(micBtn){ micBtn.addEventListener('click', toggleMic); }
     if(!chatBusy) setTimeout(function(){ inputEl.focus(); }, 0);
     setTimeout(function(){ log.scrollTop = log.scrollHeight; }, 0);
+
+    if(chatNeedsGeminiKey){
+      var keyBox = document.createElement('div');
+      keyBox.className = 'status-line warn';
+      keyBox.style.cssText = 'flex-direction:column;align-items:stretch;gap:8px;';
+      keyBox.innerHTML =
+        '<div>'+chatKeyReason+' Вставьте бесплатный ключ Gemini (один раз на это устройство) — получить: ' +
+        '<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></div>' +
+        '<div style="display:flex;gap:8px;">' +
+        '<input id="chatGeminiKeyInput" type="text" placeholder="Вставьте ключ сюда" style="flex:1;min-width:0;font:inherit;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);">' +
+        '<button type="button" id="chatGeminiKeySave" class="btn primary sm">Сохранить</button>' +
+        '</div>';
+      box.appendChild(keyBox);
+      keyBox.querySelector('#chatGeminiKeySave').addEventListener('click', saveChatGeminiKey);
+      keyBox.querySelector('#chatGeminiKeyInput').addEventListener('keydown', function(ev){ if(ev.key==='Enter') saveChatGeminiKey(); });
+      setTimeout(function(){ var k=document.getElementById('chatGeminiKeyInput'); if(k) k.focus(); }, 0);
+    }
 
     return box;
   }
@@ -1937,10 +1973,12 @@
     return row;
   }
 
-  function submitChat(){
-    var inputEl = document.getElementById('chatInput');
-    if(!inputEl) return;
-    var text = inputEl.value.trim();
+  function submitChat(text){
+    if(text===undefined){
+      var inputEl = document.getElementById('chatInput');
+      if(!inputEl) return;
+      text = inputEl.value.trim();
+    }
     if(!text || chatBusy) return;
     if(!sampleNs){
       chatHistory.push({role:'user', text:text});
@@ -1948,23 +1986,90 @@
       renderAll();
       return;
     }
+    chatNeedsGeminiKey = false;
     chatHistory.push({role:'user', text:text});
     chatBusy = true;
     renderAll();
     runAssistant(text).then(function(reply){
       chatHistory.push(reply);
     }).catch(function(e){
-      chatHistory.push({role:'assistant', text: assistantErrorCopy(e)});
+      if(e && (e.code==='no_key' || e.code==='bad_key')){
+        chatRetryText = text;
+        chatNeedsGeminiKey = true;
+        chatKeyReason = e.code==='bad_key' ? 'Сохранённый ключ Gemini не работает (устарел или отозван) — вставьте новый.' : 'Голосовой помощник ещё не настроен на этом устройстве.';
+      } else {
+        chatHistory.push({role:'assistant', text: assistantErrorCopy(e)});
+      }
     }).then(function(){
       chatBusy = false;
       renderAll();
     });
   }
 
+  function saveChatGeminiKey(){
+    var el = document.getElementById('chatGeminiKeyInput');
+    if(!el) return;
+    var v = el.value.trim();
+    if(!v) return;
+    window.AKK_GEMINI_KEY.set(v);
+    chatNeedsGeminiKey = false;
+    var retryText = chatRetryText;
+    chatRetryText = '';
+    if(retryText) submitChat(retryText);
+    else renderAll();
+  }
+
+  function ensureMicRecognition(){
+    if(micRecognition || !micSupported) return micRecognition;
+    var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var r = new Rec();
+    r.lang = 'ru-RU';
+    r.interimResults = true;
+    r.maxAlternatives = 1;
+    r.continuous = false;
+    r.onresult = function(ev){
+      var text = '';
+      for(var i=0;i<ev.results.length;i++){ text += ev.results[i][0].transcript; }
+      var el = document.getElementById('chatInput');
+      if(el) el.value = text;
+    };
+    r.onerror = function(){
+      micListening = false;
+      renderAll();
+    };
+    r.onend = function(){
+      micListening = false;
+      renderAll();
+    };
+    micRecognition = r;
+    return r;
+  }
+
+  function toggleMic(){
+    var r = ensureMicRecognition();
+    if(!r) return;
+    if(micListening){
+      try{ r.stop(); }catch(e){}
+      micListening = false;
+      renderAll();
+      return;
+    }
+    try{
+      var el = document.getElementById('chatInput');
+      if(el) el.value = '';
+      r.start();
+      micListening = true;
+    }catch(e){
+      micListening = false;
+    }
+    renderAll();
+  }
+
   function assistantErrorCopy(e){
     var code = e && e.code;
     if(code==='not_granted') return 'Доступ к помощнику не разрешён для этого окна.';
     if(code==='rate_limited') return 'Сейчас перегружено — попробуйте через минуту.';
+    if(code==='overloaded') return 'Gemini сейчас перегружен — попробуйте через минуту.';
     if(code==='tools_unavailable' || code==='images_unavailable') return 'В этом окне помощник не может выполнять действия.';
     if(code==='session_expired') return 'Нужно войти заново, чтобы пользоваться помощником.';
     return 'Не получилось обработать команду. Попробуйте переформулировать.';
@@ -2341,6 +2446,8 @@
           setContactStatus('', 'Автораспознавание не разрешено — заполните поля вручную.');
         } else if(e.code==='rate_limited'){
           setContactStatus('warn', 'Сейчас перегружено — заполните поля вручную или попробуйте позже.');
+        } else if(e.code==='overloaded'){
+          setContactStatus('warn', 'Gemini сейчас перегружен — заполните поля вручную или попробуйте через минуту.');
         } else {
           setContactStatus('warn', 'Не удалось распознать автоматически — заполните поля вручную.');
         }
