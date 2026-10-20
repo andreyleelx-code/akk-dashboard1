@@ -2236,6 +2236,18 @@
         chip2.style.fontSize = '12px';
         chip2.textContent = '📌 «'+a.contact+'» отмечен мероприятием «'+a.event+'»';
         row.appendChild(chip2);
+      } else if(a.type==='project'){
+        var chip3 = document.createElement('div');
+        chip3.className = 'status-line good';
+        chip3.style.fontSize = '12px';
+        chip3.textContent = '📁 Задача «'+a.title+'» привязана к проекту «'+a.project+'»';
+        row.appendChild(chip3);
+      } else if(a.type==='automation'){
+        var chip4 = document.createElement('div');
+        chip4.className = 'status-line good';
+        chip4.style.fontSize = '12px';
+        chip4.textContent = '⚙ Правило добавлено: если '+a.trig+' — то '+a.action;
+        row.appendChild(chip4);
       }
     });
     return row;
@@ -2361,7 +2373,8 @@
             date:{type:'string', description:'Дата в формате YYYY-MM-DD, или пустая строка если без срока'},
             time:{type:'string', description:'Время, например 15:00, или пустая строка'},
             location:{type:'string'},
-            description:{type:'string'}
+            description:{type:'string'},
+            project:{type:'string', description:'Название проекта, если упомянуто (например K-PARK, «Би Вумен», Пресс-мониторинг) — необязательно. Привязывает задачу к вкладке «Проекты».'}
           },
           required:['employee_name','title']
         },
@@ -2381,16 +2394,86 @@
           var title = String(input.title||'').trim();
           if(!title) throw new Error('Не указано название задачи.');
           var date = String(input.date||'').trim();
+          var project = String(input.project||'').trim();
           var doc = {
             title:title, type: date?'point':'ongoing', status:'open',
             date:date, time:String(input.time||'').trim(), start_date:'', end_date:'',
-            from_person:'', location:String(input.location||'').trim(),
+            from_person:'', location:String(input.location||'').trim(), project:project,
             description:String(input.description||'').trim(), notes:'', notes_log:[], checklist:[], attachments:[],
             created_at:new Date().toISOString(), updated_at:new Date().toISOString()
           };
           return dbNs.collection('employees/'+target.id+'/tasks').add(doc).then(function(){
             pendingActions.push({type:'task', title:title, employee:target.name, date:date});
-            return {ok:true, employee:target.name, title:title, date: date||'без срока'};
+            return {ok:true, employee:target.name, title:title, date: date||'без срока', project: project||'(без проекта)'};
+          });
+        }
+      },
+      {
+        name: 'find_task',
+        description: 'Ищет существующую задачу по названию (и опционально по сотруднику). Возвращает до 5 совпадений с employee_id, task_id, названием, датой, статусом и текущим проектом. Используй перед set_task_project.',
+        inputSchema: {
+          type:'object',
+          properties:{ query:{type:'string', description:'Часть названия задачи'}, employee_name:{type:'string', description:'Имя сотрудника, если известно — сузит поиск'} },
+          required:['query']
+        },
+        execute: function(input){
+          var q = String(input.query||'').trim().toLowerCase();
+          if(!q) return [];
+          var empFilter = String(input.employee_name||'').trim().toLowerCase();
+          var out = [];
+          employees.forEach(function(e){
+            if(empFilter && empFilter!=='me' && empFilter!=='я'){
+              var n = e.name.toLowerCase();
+              if(n.indexOf(empFilter)===-1 && empFilter.indexOf(n)===-1) return;
+            }
+            (tasksBySlug[e.id]||[]).forEach(function(t){
+              if(t.title && t.title.toLowerCase().indexOf(q)!==-1){
+                out.push({employee_id:e.id, employee:e.name, task_id:t.id, title:t.title, date:t.date||t.start_date||'', status:t.status, project:t.project||'(нет)'});
+              }
+            });
+          });
+          return out.slice(0,5);
+        }
+      },
+      {
+        name: 'set_task_project',
+        description: 'Привязывает УЖЕ СУЩЕСТВУЮЩУЮ задачу к проекту (например K-PARK, «Би Вумен», Пресс-мониторинг) — задача появится во вкладке «Проекты». Сначала найди задачу через find_task, чтобы получить employee_id и task_id. Для НОВОЙ задачи используй project в create_task, а не этот инструмент.',
+        inputSchema: {
+          type:'object',
+          properties:{ employee_id:{type:'string'}, task_id:{type:'string'}, project:{type:'string'} },
+          required:['employee_id','task_id','project']
+        },
+        execute: function(input){
+          if(!dbNs || !canWrite) throw new Error('Нет прав на запись в этом окне.');
+          var empId = String(input.employee_id||'').trim();
+          var taskId = String(input.task_id||'').trim();
+          var project = String(input.project||'').trim();
+          if(!empId || !taskId) throw new Error('Не указана задача — сначала вызови find_task.');
+          if(!project) throw new Error('Не указано название проекта.');
+          var t = (tasksBySlug[empId]||[]).find(function(x){ return x.id===taskId; });
+          if(!t) throw new Error('Задача не найдена — проверь employee_id и task_id через find_task.');
+          return dbNs.doc('employees/'+empId+'/tasks/'+taskId).update({project:project, updated_at:new Date().toISOString()}).then(function(){
+            pendingActions.push({type:'project', title:t.title, project:project});
+            return {ok:true, title:t.title, project:project};
+          });
+        }
+      },
+      {
+        name: 'create_automation_rule',
+        description: 'Добавляет правило команды АКК в формате «если — то» во вкладку «Автоматизация». Это пока чек-лист договорённостей, правило ЕЩЁ НЕ выполняется автоматически — предупреди об этом в ответе, если уместно.',
+        inputSchema: {
+          type:'object',
+          properties:{ trigger:{type:'string', description:'Условие — «если…»'}, action:{type:'string', description:'Действие — «то…»'} },
+          required:['trigger','action']
+        },
+        execute: function(input){
+          if(!dbNs || !canWrite) throw new Error('Нет прав на запись в этом окне.');
+          var trig = String(input.trigger||'').trim();
+          var act = String(input.action||'').trim();
+          if(!trig || !act) throw new Error('Нужны и условие, и действие.');
+          return dbNs.collection('automation_rules').add({trig:trig, action:act, active:true, created_at:new Date().toISOString()}).then(function(){
+            pendingActions.push({type:'automation', trig:trig, action:act});
+            return {ok:true, trigger:trig, action:act};
           });
         }
       },
@@ -2410,10 +2493,10 @@
       },
       {
         name: 'draft_email',
-        description: 'Готовит письмо контакту (тема и текст) и возвращает ссылку для открытия в почтовой программе собеседника. Письмо НЕ отправляется автоматически — только готовится, отправляет человек сам. Сначала найди контакт через find_contact.',
+        description: 'Готовит письмо (тема и текст) и возвращает ссылку для открытия в почтовой программе собеседника. Письмо НЕ отправляется автоматически — только готовится, отправляет человек сам. Если получатель — сохранённый контакт, сначала найди его через find_contact и передай contact_id/contact_name. Если это просто email (например, для вкладки «Почта», без контакта в визитнице) — передай to_email напрямую.',
         inputSchema: {
           type:'object',
-          properties:{ contact_id:{type:'string'}, contact_name:{type:'string'}, subject:{type:'string'}, body:{type:'string'} },
+          properties:{ contact_id:{type:'string'}, contact_name:{type:'string'}, to_email:{type:'string', description:'Email получателя напрямую, если это не сохранённый контакт в визитнице'}, subject:{type:'string'}, body:{type:'string'} },
           required:['subject','body']
         },
         execute: function(input){
@@ -2423,11 +2506,13 @@
             var q = String(input.contact_name).toLowerCase();
             c = contacts.find(function(x){ return x.name && x.name.toLowerCase().indexOf(q)!==-1; });
           }
-          if(!c) throw new Error('Контакт не найден — сначала вызови find_contact.');
-          if(!c.email) throw new Error('У контакта «'+c.name+'» не указан email.');
-          var href = 'mailto:'+encodeURIComponent(c.email)+'?subject='+encodeURIComponent(String(input.subject||''))+'&body='+encodeURIComponent(String(input.body||''));
-          pendingActions.push({type:'mailto', href:href, name:c.name});
-          return {ok:true, contact:c.name, email:c.email};
+          var email = c ? c.email : String(input.to_email||'').trim();
+          var label = c ? c.name : email;
+          if(c && !c.email) throw new Error('У контакта «'+c.name+'» не указан email.');
+          if(!email) throw new Error('Email не найден — укажи to_email напрямую или найди контакт через find_contact.');
+          var href = 'mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(String(input.subject||''))+'&body='+encodeURIComponent(String(input.body||''));
+          pendingActions.push({type:'mailto', href:href, name:label});
+          return {ok:true, to:label, email:email};
         }
       },
       {
@@ -2464,8 +2549,9 @@
         (me ? 'Собеседник — сотрудник «'+me.name+'»; если просит "мне"/"я" — это он/она. '
              : 'Собеседник не выбрал свой профиль — если просит "мне", сначала уточни текстом, кто он, не вызывая инструмент. ') +
         'Текст приходит через голосовую диктовку устройства — могут быть неточности распознавания, ориентируйся на смысл. ' +
+        'У приложения есть вкладки: Сводка, Проекты (сквозной список задач по проектам вроде K-PARK, «Би Вумен», Пресс-мониторинг), по вкладке на сотрудника, Визитница (контакты), Почта (черновики писем через mailto — реальной интеграции с Gmail ещё нет) и Автоматизация (список правил «если—то», пока без реального выполнения). ' +
         (canUseTools
-          ? 'Чтобы поставить задачу — вызови create_task. Чтобы найти контакт — find_contact. Чтобы подготовить письмо контакту — сначала find_contact, затем draft_email (письмо не отправляется само, только готовится). Чтобы отметить, с какого мероприятия контакт (форум, конференция, встреча) — сначала find_contact, затем set_contact_event. Относительные даты ("завтра", "в пятницу", "через неделю") переводи в YYYY-MM-DD от сегодняшней даты.'
+          ? 'Чтобы поставить НОВУЮ задачу — вызови create_task (можно сразу с project, если упомянут проект). Чтобы привязать к проекту УЖЕ СУЩЕСТВУЮЩУЮ задачу — сначала find_task, затем set_task_project. Чтобы найти контакт — find_contact. Чтобы подготовить письмо — для контакта из визитницы: сначала find_contact, затем draft_email; для произвольного email (например, по просьбе из «Почты») — сразу draft_email с to_email (письмо не отправляется само, только готовится). Чтобы отметить, с какого мероприятия контакт (форум, конференция, встреча) — сначала find_contact, затем set_contact_event. Чтобы добавить правило автоматизации («если — то») — create_automation_rule, и упомяни в ответе, что оно пока не выполняется само, а только записывается. Относительные даты ("завтра", "в пятницу", "через неделю") переводи в YYYY-MM-DD от сегодняшней даты.'
           : 'В этом окне выполнять действия нельзя — только отвечай советом текстом.') +
         ' Отвечай кратко и по-русски.';
 
