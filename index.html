@@ -110,6 +110,30 @@
   .tab-btn.active{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600; box-shadow:0 2px 7px rgba(42,120,214,.35);}
   .tab-btn.ghost-add{color:var(--ink-dim); border-style:dashed;}
 
+  /* --- global voice assistant FAB: left corner so it never overlaps the
+       visitnitsa's own "add contact" FAB (right corner) on any tab --- */
+  .fab-voice{
+    position:fixed; left:18px; bottom:calc(20px + env(safe-area-inset-bottom,0px));
+    width:56px; height:56px; border-radius:50%; border:0; background:var(--accent); color:var(--accent-ink);
+    font-size:22px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 18px rgba(0,0,0,.25); cursor:pointer; z-index:10;
+  }
+
+  /* --- projects tab --- */
+  .proj-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:11px 13px; box-shadow:var(--shadow-1);}
+  .proj-card h3{margin:0; font-size:14.5px;}
+  .proj-card .proj-meta{font-size:12px; color:var(--ink-dim); margin-top:2px;}
+  .proj-task-row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:6px 0; border-top:1px solid var(--line); font-size:13px; cursor:pointer;}
+  .proj-task-row:first-of-type{border-top:none;}
+  .proj-task-row.done{opacity:.55; text-decoration:line-through;}
+  .proj-task-row .who{color:var(--ink-dim); font-weight:400;}
+  .proj-task-row .when{color:var(--ink-dim); white-space:nowrap; font-family:var(--font-mono); font-size:11.5px;}
+
+  /* --- automation tab --- */
+  .auto-rule{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px;}
+  .auto-rule .rule-if{font-weight:600;}
+  .auto-rule .rule-then{color:var(--ink-dim);}
+
   main{flex:1; padding-block:4px 56px;}
   .panel{display:flex; flex-direction:column; gap:10px;}
 
@@ -205,26 +229,45 @@
   .crm-line.overdue b{color:var(--accent);}
   .crm-touch-btn{border:0; background:var(--surface); color:var(--accent); font:inherit; font-size:11.5px; font-weight:600; padding:5px 9px; border-radius:7px; cursor:pointer; flex:none;}
 
-  /* --- calendar --- */
+  /* --- calendar ---
+     Google-Calendar-style compact month grid: thin hairlines between cells
+     (grid background = --line colour, 1px gap, cells painted --surface on
+     top), a small round "today" badge for the date number, and each event
+     as its own text row (dot + optional time + title) instead of a filled
+     pill — reads like a real month view, not a list of tags. */
   .cal-nav{display:flex; align-items:center; justify-content:space-between;}
   .cal-nav button{background:var(--surface); border:1px solid var(--line); border-radius:8px; width:28px; height:28px; cursor:pointer; color:var(--ink);}
   .cal-nav .cal-title{font-weight:700; font-size:14px; text-transform:capitalize;}
-  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
-  .cal-dow{text-align:center; font-size:10px; color:var(--ink-dim); font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
+  .cal-grid{
+    display:grid; grid-template-columns:repeat(7,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;
+  }
+  .cal-dow{text-align:center; font-size:10px; color:var(--ink-dim); font-weight:600; text-transform:uppercase; letter-spacing:.03em; background:var(--surface); padding:5px 0;}
   .cal-cell{
-    min-height:42px; border:1px solid var(--line); border-radius:8px; background:var(--surface);
-    padding:3px; display:flex; flex-direction:column; gap:1px; cursor:pointer; position:relative; min-width:0;
+    min-height:60px; background:var(--surface);
+    padding:3px 3px 2px; display:flex; flex-direction:column; gap:1px; cursor:pointer; position:relative; min-width:0;
   }
-  .cal-cell.outside{opacity:.35;}
-  .cal-cell.today{border-color:var(--accent); border-width:1.5px;}
-  .cal-daynum{font-size:10.5px; color:var(--ink-dim); font-family:var(--font-mono);}
-  .cal-cell.today .cal-daynum{color:var(--accent); font-weight:700;}
-  .cal-chip{
-    font-size:8.5px; background:var(--surface-2); border-radius:4px; padding:0 3px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;
+  .cal-cell.outside{background:var(--bg);}
+  .cal-cell.outside .cal-daynum{opacity:.4;}
+  .cal-daynum{
+    align-self:flex-start; font-size:10.5px; color:var(--ink-dim); font-family:var(--font-mono); font-weight:600;
+    width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; margin-bottom:1px;
   }
-  .cal-chip.done{opacity:.55; text-decoration:line-through;}
-  .cal-note-dot{position:absolute; top:4px; right:5px; width:5px; height:5px; border-radius:50%; background:var(--warn);}
+  .cal-cell.today .cal-daynum{background:var(--accent); color:var(--accent-ink); font-weight:700;}
+  .cal-event-row{
+    display:flex; align-items:center; gap:3px; min-width:0; font-size:9px; line-height:1.4;
+    cursor:pointer; border-radius:3px; padding:0 1px;
+  }
+  .cal-event-row:hover{background:var(--surface-2);}
+  .cal-event-row.done{opacity:.5;}
+  .cal-event-dot{flex:none; width:5px; height:5px; border-radius:50%; background:var(--accent);}
+  .cal-event-row.done .cal-event-dot{background:var(--good);}
+  .cal-event-time{flex:none; font-family:var(--font-mono); color:var(--ink-dim);}
+  .cal-event-title{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cal-event-row.done .cal-event-title{text-decoration:line-through;}
+  .cal-event-more{font-size:9px; color:var(--ink-dim); padding:0 1px; cursor:pointer;}
+  .cal-event-more:hover{color:var(--accent);}
+  .cal-note-dot{position:absolute; top:3px; right:4px; width:5px; height:5px; border-radius:50%; background:var(--warn);}
 
   /* --- dashboard bars --- */
   .bar-wrap{display:flex; flex-direction:column; gap:6px;}
@@ -392,9 +435,10 @@
     .check-item{gap:12px; padding-block:4px;}
     .check-item input[type=checkbox]{width:23px; height:23px;}
     .cal-nav button{width:42px; height:42px; font-size:18px;}
-    .cal-cell{min-height:50px; padding:5px;}
-    .cal-daynum{font-size:11.5px;}
-    .cal-chip{font-size:9.5px; padding:2px 4px;}
+    .cal-cell{min-height:66px; padding:4px 4px 3px;}
+    .cal-daynum{font-size:11px; width:19px; height:19px; line-height:19px;}
+    .cal-event-row{font-size:10px;}
+    .cal-event-more{font-size:10px;}
     .sheet-close{padding:10px 12px; font-size:14px;}
     .copy-btn{padding:9px 12px; font-size:13.5px;}
     .bc-move{padding:8px 13px; font-size:13.5px;}
@@ -426,6 +470,11 @@
     .board-wrap{overflow-x:visible; flex-wrap:wrap;}
     .board-col{width:auto; max-width:none; flex:1 1 220px;}
     .stat-row{grid-template-columns:repeat(4,1fr);}
+    /* More vertical room on desktop — enough for 4 event rows per day, like a real month view. */
+    .cal-cell{min-height:92px; padding:5px 5px 4px;}
+    .cal-daynum{font-size:11.5px; width:20px; height:20px; line-height:20px;}
+    .cal-event-row{font-size:10.5px;}
+    .cal-event-more{font-size:10.5px;}
   }
 </style>
 
@@ -439,6 +488,9 @@
 </header>
 
 <main id="main"></main>
+
+<!-- ===== Global voice assistant FAB — opens the same assistant from any tab ===== -->
+<button class="fab-voice" id="globalAssistantFab" title="Голосовой помощник" aria-label="Голосовой помощник">🎤</button>
 
 <!-- ===== Day modal (calendar day click) ===== -->
 <div class="sheet-overlay" id="dayOverlay" hidden>
@@ -554,6 +606,14 @@
     <div class="field"><label for="empBio">О себе</label><textarea id="empBio" placeholder="Короткая заметка о роли, зоне ответственности…"></textarea></div>
     <button class="btn primary block" id="empSave">Добавить</button>
     <button class="btn danger block" id="empDeleteBtn" hidden>Удалить сотрудника</button>
+  </div>
+</div>
+
+<!-- ===== Global voice assistant sheet (unified — same panel, reachable from any tab) ===== -->
+<div class="sheet-overlay" id="assistantOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Голосовой помощник</h2><button class="sheet-close" id="assistantOverlayClose">Закрыть</button></div>
+    <div id="assistantOverlayBody"></div>
   </div>
 </div>
 
@@ -794,6 +854,7 @@
   var dayNotesBySlug = {};         // id -> {iso: entries[]}
   var subscribed = {};             // id -> true
   var contacts = [];
+  var automationRules = [];        // [{id,trig,action,active,created_at}]
   var uiState = {};                // id -> {view, calY, calM, filter}
   var activeTab = 'summary';
   var dayModal = null;             // {slug, iso, mode}
@@ -860,10 +921,13 @@
   function renderTabbar(){
     var bar = document.getElementById('tabbar');
     var html = '<button class="tab-btn'+(activeTab==='summary'?' active':'')+'" data-tab="summary">Сводка</button>';
+    html += '<button class="tab-btn'+(activeTab==='projects'?' active':'')+'" data-tab="projects">Проекты</button>';
     employees.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}).forEach(function(e){
       html += '<button class="tab-btn'+(activeTab===e.id?' active':'')+'" data-tab="'+esc(e.id)+'" title="'+esc(e.name)+'">'+esc(givenName(e.name))+'</button>';
     });
     html += '<button class="tab-btn'+(activeTab==='contacts'?' active':'')+'" data-tab="contacts">Визитница</button>';
+    html += '<button class="tab-btn'+(activeTab==='mail'?' active':'')+'" data-tab="mail">Почта</button>';
+    html += '<button class="tab-btn'+(activeTab==='automation'?' active':'')+'" data-tab="automation">Автоматизация</button>';
     if(canWrite) html += '<button class="tab-btn ghost-add" id="addEmpTabBtn" title="Добавить сотрудника">+</button>';
     bar.innerHTML = html;
     bar.querySelectorAll('.tab-btn[data-tab]').forEach(function(b){
@@ -877,8 +941,184 @@
     renderTabbar();
     var main = document.getElementById('main');
     if(activeTab==='summary'){ main.innerHTML=''; main.appendChild(renderSummary()); }
+    else if(activeTab==='projects'){ main.innerHTML=''; main.appendChild(renderProjectsTab()); }
     else if(activeTab==='contacts'){ main.innerHTML=''; main.appendChild(renderContactsTab()); }
+    else if(activeTab==='mail'){ main.innerHTML=''; main.appendChild(renderMailTab()); }
+    else if(activeTab==='automation'){ main.innerHTML=''; main.appendChild(renderAutomationTab()); }
     else { main.innerHTML=''; main.appendChild(renderEmployeeTab(activeTab)); }
+    var aOverlay = document.getElementById('assistantOverlay');
+    if(aOverlay && !aOverlay.hidden) renderGlobalAssistant();
+  }
+
+  // ===================================================================
+  // PROJECTS TAB — cross-employee view of tasks tagged with a project.
+  // No new collection: reuses the existing per-employee tasks already kept
+  // live in tasksBySlug, grouped by an optional `project` text field set
+  // from the task's edit form (see renderTaskEditForm → #etProject).
+  // ===================================================================
+  function allProjectNames(){
+    var set = {};
+    employees.forEach(function(e){
+      (tasksBySlug[e.id]||[]).forEach(function(t){ if(t.project) set[t.project]=true; });
+    });
+    return Object.keys(set).sort(function(a,b){ return a.localeCompare(b,'ru'); });
+  }
+
+  function renderProjectsTab(){
+    var wrap = document.createElement('div');
+    wrap.className = 'panel';
+    wrap.style.paddingBottom = '70px';
+
+    var hint = document.createElement('p');
+    hint.style.cssText = 'margin:0 0 4px;font-size:12.5px;color:var(--ink-dim);';
+    hint.textContent = 'Задачи разных сотрудников, сгруппированные по проекту. Чтобы привязать задачу — откройте её у сотрудника → «Изменить» → впишите название проекта (например, K-PARK, «Би Вумен», Пресс-мониторинг).';
+    wrap.appendChild(hint);
+
+    var names = allProjectNames();
+    var noProjectCount = 0;
+    employees.forEach(function(e){ (tasksBySlug[e.id]||[]).forEach(function(t){ if(!t.project) noProjectCount++; }); });
+
+    if(!names.length){
+      var empty = document.createElement('div'); empty.className='empty'; empty.style.marginTop='10px';
+      empty.textContent = 'Пока ни одна задача не привязана к проекту.';
+      wrap.appendChild(empty);
+      return wrap;
+    }
+
+    names.forEach(function(name){
+      var rows = [];
+      employees.forEach(function(e){
+        (tasksBySlug[e.id]||[]).forEach(function(t){
+          if(t.project===name) rows.push({slug:e.id, empName:e.name, task:t});
+        });
+      });
+      rows.sort(function(a,b){ return (a.task.date||a.task.start_date||'9999').localeCompare(b.task.date||b.task.start_date||'9999'); });
+      var openCount = rows.filter(function(r){ return r.task.status!=='done'; }).length;
+
+      var card = document.createElement('div');
+      card.className = 'proj-card';
+      card.style.marginBottom = '10px';
+      card.innerHTML = '<h3>'+esc(name)+'</h3><div class="proj-meta">Всего задач: '+rows.length+' · открыто: '+openCount+'</div>';
+
+      var list = document.createElement('div');
+      rows.forEach(function(r){
+        var row = document.createElement('div');
+        row.className = 'proj-task-row'+(r.task.status==='done'?' done':'');
+        var dateLabel = r.task.date ? fmtHuman(r.task.date) : (r.task.start_date ? fmtHuman(r.task.start_date) : '');
+        row.innerHTML = '<span>'+esc(r.task.title)+' <span class="who">— '+esc(givenName(r.empName))+'</span></span><span class="when">'+esc(dateLabel)+'</span>';
+        row.addEventListener('click', function(){ openTaskModal(r.slug, r.task.id); });
+        list.appendChild(row);
+      });
+      card.appendChild(list);
+      wrap.appendChild(card);
+    });
+
+    if(noProjectCount){
+      var note = document.createElement('p');
+      note.style.cssText = 'margin-top:4px;font-size:12px;color:var(--ink-dim);';
+      note.textContent = 'Без привязки к проекту: '+noProjectCount+' задач.';
+      wrap.appendChild(note);
+    }
+
+    return wrap;
+  }
+
+  // ===================================================================
+  // MAIL TAB — honest placeholder: no Gmail integration is wired up yet
+  // (it needs an OAuth client set up in Google Cloud Console, a decision
+  // Andrey has to make), so for now this gives a working mailto: composer
+  // instead of pretending to show a real inbox.
+  // ===================================================================
+  function renderMailTab(){
+    var wrap = document.createElement('div');
+    wrap.className = 'panel';
+    wrap.style.paddingBottom = '70px';
+
+    var info = document.createElement('div');
+    info.className = 'status-line warn';
+    info.style.cssText = 'flex-direction:column; align-items:stretch; gap:4px;';
+    info.innerHTML = '<div><b>Интеграция с Gmail пока не подключена.</b></div>' +
+      '<div style="font-size:12.5px;">Нужен OAuth-доступ к почтовому ящику АКК через Google Cloud Console — это разовая настройка. Если у ассоциации уже есть отдельная система мониторинга почты — эту вкладку свяжем с ней отдельным шагом, когда это уточнится.</div>';
+    wrap.appendChild(info);
+
+    var sub = document.createElement('p');
+    sub.style.cssText = 'margin:14px 0 2px;font-size:12.5px;color:var(--ink-dim);';
+    sub.textContent = 'Пока — быстрый способ написать письмо через вашу почтовую программу:';
+    wrap.appendChild(sub);
+
+    var form = document.createElement('div');
+    form.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+    form.innerHTML =
+      '<div class="field"><label>Кому</label><input type="text" id="mailTo" inputmode="email" placeholder="email@example.com"></div>' +
+      '<div class="field"><label>Тема</label><input type="text" id="mailSubj" placeholder="Тема письма"></div>' +
+      '<div class="field"><label>Текст</label><textarea id="mailBody" placeholder="Текст письма…"></textarea></div>' +
+      '<button class="btn primary" id="mailOpenBtn">✉ Открыть письмо</button>';
+    wrap.appendChild(form);
+
+    form.querySelector('#mailOpenBtn').addEventListener('click', function(){
+      var to = form.querySelector('#mailTo').value.trim();
+      var subj = form.querySelector('#mailSubj').value.trim();
+      var body = form.querySelector('#mailBody').value.trim();
+      var href = 'mailto:' + to + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+      window.open(href, '_blank');
+    });
+
+    return wrap;
+  }
+
+  // ===================================================================
+  // AUTOMATION TAB — team's own "если — то" rules, stored for real in
+  // Firestore (automation_rules) so they persist and are shared by
+  // everyone, but NOT yet executed automatically: this is the checklist
+  // step from the roadmap, before a real rules engine reads these.
+  // ===================================================================
+  function renderAutomationTab(){
+    var wrap = document.createElement('div');
+    wrap.className = 'panel';
+    wrap.style.paddingBottom = '70px';
+
+    var info = document.createElement('p');
+    info.style.cssText = 'margin:0 0 10px;font-size:12.5px;color:var(--ink-dim);';
+    info.textContent = 'Список договорённостей команды в формате «если — то». Это пока чек-лист, не автоматическое выполнение — следующий шаг развития системы научит её выполнять эти правила самостоятельно.';
+    wrap.appendChild(info);
+
+    if(canWrite){
+      var form = document.createElement('div');
+      form.style.cssText = 'display:flex; flex-direction:column; gap:8px; margin-bottom:16px; padding:12px; background:var(--surface); border:1px solid var(--line); border-radius:10px;';
+      form.innerHTML =
+        '<div class="field"><label>Если…</label><input type="text" id="autoIf" placeholder="например: подходит дедлайн задачи по K-PARK"></div>' +
+        '<div class="field"><label>То…</label><input type="text" id="autoThen" placeholder="например: напомнить ответственному за день"></div>' +
+        '<button class="btn primary" id="autoAddBtn">+ Добавить правило</button>';
+      wrap.appendChild(form);
+      form.querySelector('#autoAddBtn').addEventListener('click', function(){
+        var ifv = form.querySelector('#autoIf').value.trim();
+        var thenv = form.querySelector('#autoThen').value.trim();
+        if(!ifv || !thenv || !dbNs) return;
+        dbNs.collection('automation_rules').add({trig:ifv, action:thenv, active:true, created_at:new Date().toISOString()}).then(function(){
+          form.querySelector('#autoIf').value=''; form.querySelector('#autoThen').value='';
+        });
+      });
+    }
+
+    if(!automationRules.length){
+      var empty = document.createElement('div'); empty.className='empty'; empty.textContent='Пока нет правил.'; wrap.appendChild(empty);
+      return wrap;
+    }
+
+    automationRules.slice().sort(function(a,b){ return (a.created_at||'').localeCompare(b.created_at||''); }).forEach(function(r){
+      var row = document.createElement('div');
+      row.className = 'auto-rule';
+      row.innerHTML = '<div><span class="rule-if">Если:</span> '+esc(r.trig)+'</div><div><span class="rule-then">То:</span> '+esc(r.action)+'</div>';
+      if(canWrite){
+        var del = document.createElement('button');
+        del.className = 'btn sm ghost'; del.style.marginTop = '6px'; del.textContent = 'Удалить';
+        del.addEventListener('click', function(){ if(dbNs) dbNs.doc('automation_rules/'+r.id).delete(); });
+        row.appendChild(del);
+      }
+      wrap.appendChild(row);
+    });
+
+    return wrap;
   }
 
   // ===================================================================
@@ -1198,12 +1438,18 @@
         if(t.type==='point') return t.date===iso;
         if(t.type==='range') return t.start_date<=iso && iso<=t.end_date;
         return false;
-      });
+      }).slice().sort(function(a,b){ return (a.time||'99:99').localeCompare(b.time||'99:99'); });
       var html = '<span class="cal-daynum">'+d.getDate()+'</span>';
-      dayTasks.slice(0,3).forEach(function(t){
-        html += '<div class="cal-chip'+(t.status==='done'?' done':'')+'" data-task="'+esc(t.id)+'">'+esc(t.title)+'</div>';
+      var CAL_MAX_ROWS = 3;
+      dayTasks.slice(0,CAL_MAX_ROWS).forEach(function(t){
+        var full = (t.time ? t.time+' ' : '') + t.title;
+        html += '<div class="cal-event-row'+(t.status==='done'?' done':'')+'" data-task="'+esc(t.id)+'" title="'+esc(full)+'">' +
+          '<span class="cal-event-dot"></span>' +
+          (t.time ? '<span class="cal-event-time">'+esc(t.time)+'</span>' : '') +
+          '<span class="cal-event-title">'+esc(t.title)+'</span>' +
+        '</div>';
       });
-      if(dayTasks.length>3) html += '<div class="cal-chip">+'+(dayTasks.length-3)+'</div>';
+      if(dayTasks.length>CAL_MAX_ROWS) html += '<div class="cal-event-more">+'+(dayTasks.length-CAL_MAX_ROWS)+' ещё</div>';
       if(notes[iso] && notes[iso].length) html += '<span class="cal-note-dot"></span>';
       cell.innerHTML = html;
       cell.addEventListener('click', function(ev){
@@ -1494,6 +1740,8 @@
     }
     html += '<div class="field"><label>Место</label><input type="text" id="etLoc" value="'+esc(t.location||'')+'"></div>';
     html += '<div class="field"><label>От кого</label><input type="text" id="etFrom" value="'+esc(t.from_person||'')+'"></div>';
+    html += '<div class="field"><label>Проект</label><input type="text" id="etProject" list="etProjectList" value="'+esc(t.project||'')+'" placeholder="например, K-PARK"></div>';
+    html += '<datalist id="etProjectList">' + allProjectNames().map(function(n){ return '<option value="'+esc(n)+'">'; }).join('') + '</datalist>';
     html += '<div class="field"><label>Описание</label><textarea id="etDesc">'+esc(t.description||'')+'</textarea></div>';
     html += '<div class="row2"><button class="btn ghost" style="flex:1" id="etCancel">Отмена</button><button class="btn primary" style="flex:2" id="etSave">Сохранить</button></div>';
     body.innerHTML = html;
@@ -1504,6 +1752,7 @@
         title: body.querySelector('#etTitle').value.trim() || t.title,
         location: body.querySelector('#etLoc').value.trim(),
         from_person: body.querySelector('#etFrom').value.trim(),
+        project: body.querySelector('#etProject').value.trim(),
         description: body.querySelector('#etDesc').value.trim(),
         updated_at: new Date().toISOString()
       };
@@ -1614,7 +1863,7 @@
 
     var subnav = document.createElement('div');
     subnav.className = 'subnav';
-    [['list','Контакты'],['timeline','Хронология'],['assistant','Голосовой помощник']].forEach(function(p){
+    [['list','Контакты'],['timeline','Хронология']].forEach(function(p){
       var b = document.createElement('button');
       b.textContent = p[1];
       if(contactsView===p[0]) b.className = 'active';
@@ -1623,7 +1872,11 @@
     });
     wrap.appendChild(subnav);
 
-    if(contactsView === 'assistant'){ wrap.appendChild(renderAssistantPanel()); return wrap; }
+    var voiceHint = document.createElement('p');
+    voiceHint.style.cssText = 'margin:0;font-size:11.5px;color:var(--ink-dim);';
+    voiceHint.textContent = 'Голосовой помощник теперь доступен из любого раздела приложения — кнопка 🎤 в левом нижнем углу экрана.';
+    wrap.appendChild(voiceHint);
+
     if(contactsView === 'timeline'){ wrap.appendChild(renderContactsTimeline()); return wrap; }
 
     var search = document.createElement('div');
@@ -1866,6 +2119,21 @@
     whoOverlay.hidden = false;
   }
 
+  // ===== Global voice assistant FAB — unifies the one assistant across
+  // every tab instead of only inside "Визитница" =====
+  var assistantOverlay = document.getElementById('assistantOverlay');
+  var assistantOverlayCloseBtn = document.getElementById('assistantOverlayClose');
+  var globalAssistantFab = document.getElementById('globalAssistantFab');
+  if(assistantOverlayCloseBtn) assistantOverlayCloseBtn.addEventListener('click', function(){ assistantOverlay.hidden = true; });
+  if(assistantOverlay) assistantOverlay.addEventListener('click', function(e){ if(e.target===assistantOverlay) assistantOverlay.hidden = true; });
+  if(globalAssistantFab) globalAssistantFab.addEventListener('click', function(){ assistantOverlay.hidden = false; renderGlobalAssistant(); });
+  function renderGlobalAssistant(){
+    var body = document.getElementById('assistantOverlayBody');
+    if(!body) return;
+    body.innerHTML = '';
+    body.appendChild(renderAssistantPanel());
+  }
+
   function renderAssistantPanel(){
     var box = document.createElement('div');
     box.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
@@ -2072,7 +2340,8 @@
     if(code==='overloaded') return 'Gemini сейчас перегружен — попробуйте через минуту.';
     if(code==='tools_unavailable' || code==='images_unavailable') return 'В этом окне помощник не может выполнять действия.';
     if(code==='session_expired') return 'Нужно войти заново, чтобы пользоваться помощником.';
-    return 'Не получилось обработать команду. Попробуйте переформулировать.';
+    var detail = (e && e.message) ? String(e.message).slice(0,200) : '';
+    return 'Не получилось обработать команду. Попробуйте переформулировать.' + (detail ? ' ('+detail+')' : '');
   }
 
   function runAssistant(text){
@@ -2313,15 +2582,51 @@
   document.getElementById('addClose').addEventListener('click', function(){ addOverlay.hidden = true; });
   addOverlay.addEventListener('click', function(e){ if(e.target===addOverlay) addOverlay.hidden = true; });
 
+  function downscaleImageFile(file, maxDim){
+    return new Promise(function(resolve){
+      try{
+        var url = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function(){
+          try{
+            var w = img.naturalWidth, h = img.naturalHeight;
+            if(!w || !h || (w<=maxDim && h<=maxDim)){ URL.revokeObjectURL(url); resolve(file); return; }
+            var scale = Math.min(1, maxDim/Math.max(w,h));
+            var cw = Math.max(1, Math.round(w*scale)), ch = Math.max(1, Math.round(h*scale));
+            var canvas = document.createElement('canvas');
+            canvas.width = cw; canvas.height = ch;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, cw, ch);
+            canvas.toBlob(function(blob){
+              URL.revokeObjectURL(url);
+              if(!blob){ resolve(file); return; }
+              resolve(new File([blob], (file.name||'photo').replace(/\.[^.]+$/,'')+'.jpg', {type:'image/jpeg'}));
+            }, 'image/jpeg', 0.85);
+          }catch(e){ URL.revokeObjectURL(url); resolve(file); }
+        };
+        // Some formats (e.g. HEIC in non-Safari browsers) can't be decoded
+        // into an <img> — fall back to the original file untouched.
+        img.onerror = function(){ URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+      }catch(e){ resolve(file); }
+    });
+  }
+
   function onContactPhotoPicked(ev){
     var input = ev.target;
     var file = input.files && input.files[0];
     if(!file) return;
-    selectedContactFile = file;
-    photoPreviewImg.src = URL.createObjectURL(file);
     photoStep.hidden = true; photoPreviewWrap.hidden = false; formFields.hidden = false;
     retakeBtn.hidden = false; saveContactBtn.hidden = false; saveContactBtn.disabled = false;
-    tryRecognizeContact(file);
+    setContactStatus('', '<span class="spinner"></span> Готовлю фото…');
+    // Phone photos can be very large (multiple MB, 4000px+) — shrink to a
+    // size that's plenty for OCR and much less likely to time out or hit
+    // a request-size limit.
+    downscaleImageFile(file, 1600).then(function(optimized){
+      selectedContactFile = optimized;
+      photoPreviewImg.src = URL.createObjectURL(optimized);
+      tryRecognizeContact(optimized);
+    });
   }
   photoInputCamera.addEventListener('change', onContactPhotoPicked);
   photoInputGallery.addEventListener('change', onContactPhotoPicked);
@@ -2449,7 +2754,9 @@
         } else if(e.code==='overloaded'){
           setContactStatus('warn', 'Gemini сейчас перегружен — заполните поля вручную или попробуйте через минуту.');
         } else {
-          setContactStatus('warn', 'Не удалось распознать автоматически — заполните поля вручную.');
+          var detail = (e && e.message) ? String(e.message).slice(0,200) : '';
+          setContactStatus('warn', 'Не удалось распознать автоматически — заполните поля вручную.' +
+            (detail ? '<div style="margin-top:4px;font-size:11px;opacity:.7;word-break:break-word;">'+esc(detail)+'</div>' : ''));
         }
       });
     }).catch(function(){ setContactStatus('', 'Автораспознавание недоступно — заполните поля вручную.'); });
@@ -2600,6 +2907,10 @@
     dbNs.collection('contacts').onSnapshot(function(snap){
       contacts = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
       if(activeTab==='contacts') renderAll();
+    }, function(){});
+    dbNs.collection('automation_rules').onSnapshot(function(snap){
+      automationRules = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      if(activeTab==='automation') renderAll();
     }, function(){});
   }
 
