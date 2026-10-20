@@ -854,7 +854,7 @@
   window.claude = {
     use: function(name){
       if(name==='db') return Promise.resolve(dbInstance);
-      if(name==='assets') return Promise.resolve({upload: uploadToCloudinary});
+      if(name==='assets') return Promise.resolve({upload: uploadToCloudinary, uploadDoc: uploadDocToCloudinary});
       if(name==='sample') return Promise.resolve(makeSample());
       if(name==='user') return Promise.resolve({ id: function(){
         try {
@@ -1359,7 +1359,7 @@
       '<div class="field"><label>Подразделение</label><input type="text" id="apfDept" placeholder="необязательно"></div>' +
       '<div class="field"><label>Комментарий</label><textarea id="apfNote" placeholder="доп. детали"></textarea></div>' +
       '<div class="field"><label>Файл СЗ (сканы/фото/PDF) — необязательно</label>' +
-      '<label class="btn sm ghost" style="position:relative;overflow:hidden;display:inline-block;" id="apfFileLbl">📎 Прикрепить файл<input type="file" id="apfFile" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label></div>' +
+      '<label class="btn sm ghost" style="position:relative;overflow:hidden;display:inline-block;" id="apfFileLbl"><span id="apfFileLblText">📎 Прикрепить файл</span><input type="file" id="apfFile" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label></div>' +
       '<div class="field"><label>Цепочка согласования (по порядку)</label>' +
       '<div id="apfChainChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>' +
       '<div id="apfChainPicker" style="display:flex;flex-direction:column;gap:6px;"></div></div>' +
@@ -1367,9 +1367,21 @@
 
     var fileInput = body.querySelector('#apfFile');
     fileInput.addEventListener('change', function(){
-      apprFormFileChosen = fileInput.files[0] || null;
-      var lbl = body.querySelector('#apfFileLbl');
-      if(apprFormFileChosen) lbl.innerHTML = '📎 '+esc(apprFormFileChosen.name)+'<input type="file" id="apfFile" style="position:absolute;inset:0;opacity:0;cursor:pointer;">';
+      var picked = fileInput.files[0] || null;
+      var lblText = body.querySelector('#apfFileLblText');
+      if(!picked) return;
+      // Phone camera photos can be several MB / 4000px+ — same problem the
+      // contact-photo OCR path already solved (see downscaleImageFile below).
+      // Uploading that straight over a slow connection is what was making
+      // "Отправляю…" look permanently stuck — shrink it first, same as there.
+      // (Updates a text span, not the <input> itself, so picking a different
+      // file afterwards keeps working — swapping the label's whole innerHTML
+      // would silently detach this very listener.)
+      if(lblText) lblText.textContent = '📎 Готовлю файл…';
+      downscaleImageFile(picked, 1600).then(function(optimized){
+        apprFormFileChosen = optimized;
+        if(lblText) lblText.textContent = '📎 ' + (apprFormFileChosen.name || picked.name);
+      });
     });
 
     renderApfChainUI();
@@ -1432,8 +1444,25 @@
     };
 
     var reenable = function(){ submitBtn.disabled = false; submitBtn.textContent = 'Отправить на согласование'; };
-    var doneUpload = apprFormFileChosen ? uploadDocToCloudinary(apprFormFileChosen) : Promise.resolve(null);
+    // The upload step used to be able to sit forever on "Отправляю…" with
+    // no feedback if the connection stalled (reported 20.10.2026) — a hard
+    // timeout means it always either finishes or fails visibly within 30s,
+    // on top of downscaleImageFile() already shrinking phone photos before
+    // they ever get this far.
+    function withTimeout(promise, ms, message){
+      return new Promise(function(resolve, reject){
+        var done = false;
+        var timer = setTimeout(function(){ if(!done){ done = true; reject(new Error(message)); } }, ms);
+        promise.then(function(v){ if(!done){ done = true; clearTimeout(timer); resolve(v); } },
+                      function(e){ if(!done){ done = true; clearTimeout(timer); reject(e); } });
+      });
+    }
+    if(apprFormFileChosen) submitBtn.textContent = 'Загружаю файл…';
+    var doneUpload = apprFormFileChosen
+      ? withTimeout(assetsNs.uploadDoc(apprFormFileChosen), 30000, 'Загрузка файла не отвечает — проверьте соединение и попробуйте ещё раз (можно без файла).')
+      : Promise.resolve(null);
     doneUpload.then(function(uploaded){
+      submitBtn.textContent = 'Отправляю…';
       var now = new Date().toISOString();
       var chain = apprChainDraft.map(function(c, i){
         return {step:i+1, approver_id:c.id, approver_name:c.name, status:'pending', decided_at:null, comment:''};
