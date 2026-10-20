@@ -29,6 +29,7 @@
     --accent:#2A78D6; --accent-ink:#FFFFFF;
     --good:#0CA30C; --good-bg:#E2F6E2;
     --warn:#B8790A; --warn-bg:#FDF1D9;
+    --bad:#C23A3A; --bad-bg:#FBE6E6;
     --gold:#C9A14A;
     --shadow-1:0 1px 2px rgba(20,25,43,.05), 0 2px 8px rgba(20,25,43,.06);
     --shadow-2:0 2px 4px rgba(20,25,43,.07), 0 6px 18px rgba(20,25,43,.09);
@@ -43,6 +44,7 @@
       --accent:#5B9CE8; --accent-ink:#0D1428;
       --good:#3FC93F; --good-bg:#17301A;
       --warn:#F0B23A; --warn-bg:#3A2F14;
+      --bad:#E86A6A; --bad-bg:#3A1717;
       --gold:#D9B968;
       --shadow-1:0 1px 2px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,.28);
       --shadow-2:0 2px 6px rgba(0,0,0,.3), 0 8px 22px rgba(0,0,0,.34);
@@ -56,6 +58,7 @@
     --accent:#5B9CE8; --accent-ink:#0D1428;
     --good:#3FC93F; --good-bg:#17301A;
     --warn:#F0B23A; --warn-bg:#3A2F14;
+    --bad:#E86A6A; --bad-bg:#3A1717;
     --gold:#D9B968;
     --shadow-1:0 1px 2px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,.28);
     --shadow-2:0 2px 6px rgba(0,0,0,.3), 0 8px 22px rgba(0,0,0,.34);
@@ -133,6 +136,30 @@
   .auto-rule{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px;}
   .auto-rule .rule-if{font-weight:600;}
   .auto-rule .rule-then{color:var(--ink-dim);}
+
+  /* --- approvals (согласования) tab --- */
+  .appr-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:11px 13px; box-shadow:var(--shadow-1); cursor:pointer;}
+  .appr-card h3{margin:0 0 2px; font-size:14.5px; display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .appr-card .appr-meta{font-size:12px; color:var(--ink-dim);}
+  .appr-card .appr-waiting{font-size:11.5px; font-weight:600; color:var(--accent); margin-top:4px;}
+  .appr-badge{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:3px 8px; border-radius:999px; white-space:nowrap; flex:none;}
+  .appr-badge.in_review{color:var(--warn); background:var(--warn-bg);}
+  .appr-badge.approved{color:var(--good); background:var(--good-bg);}
+  .appr-badge.declined{color:var(--bad); background:var(--bad-bg);}
+  .appr-badge.cancelled{color:var(--ink-dim); background:var(--surface-2);}
+  .appr-field-row{display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-top:1px solid var(--line); font-size:13px;}
+  .appr-field-row:first-of-type{border-top:none;}
+  .appr-field-row .k{color:var(--ink-dim); flex:none;}
+  .appr-field-row .v{text-align:right; font-weight:500;}
+  .appr-chain-step{display:flex; align-items:center; gap:9px; padding:8px 0; border-top:1px solid var(--line); font-size:13px;}
+  .appr-chain-step:first-of-type{border-top:none;}
+  .appr-chain-step .num{width:22px; height:22px; border-radius:50%; background:var(--surface-2); color:var(--ink-dim); font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none;}
+  .appr-chain-step.cur .num{background:var(--accent); color:var(--accent-ink);}
+  .appr-chain-step .who{flex:1; font-weight:500;}
+  .appr-chain-step .comment{flex-basis:100%; margin:4px 0 0 31px; font-size:12px; color:var(--ink-dim); font-style:italic;}
+  .appr-chip{display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:5px 6px 5px 11px; font-size:12.5px;}
+  .appr-chip .rm{background:none; border:0; color:var(--ink-dim); cursor:pointer; font-size:14px; line-height:1; padding:2px 5px;}
+  .appr-hist-row{font-size:11.5px; color:var(--ink-dim); padding:3px 0;}
 
   main{flex:1; padding-block:4px 56px;}
   .panel{display:flex; flex-direction:column; gap:10px;}
@@ -324,6 +351,9 @@
 
   .choice-grid{display:flex; flex-direction:column; gap:8px;}
   .choice-btn{display:flex; align-items:center; justify-content:center; gap:8px; padding:16px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-weight:600; cursor:pointer;}
+  .choice-btn.active{border-color:var(--accent); background:var(--surface); box-shadow:0 0 0 1.5px var(--accent) inset;}
+  .tab-btn-picker{display:inline-flex; align-items:center; gap:3px;}
+  .tab-caret{font-size:9px; opacity:.7;}
 
   .log-list{display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;}
   .log-item{background:var(--surface-2); border-radius:8px; padding:7px 9px; font-size:13px;}
@@ -363,6 +393,7 @@
   .status-line{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-dim); padding:8px 10px; border-radius:8px; background:var(--surface-2);}
   .status-line.good{color:var(--good); background:var(--good-bg);}
   .status-line.warn{color:var(--warn); background:var(--warn-bg);}
+  .status-line.bad{color:var(--bad); background:var(--bad-bg);}
   .spinner{width:14px; height:14px; border-radius:50%; flex:none; border:2px solid var(--line); border-top-color:var(--accent); animation:spin .7s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .detail-photo{width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--line); margin-bottom:4px;}
@@ -462,7 +493,10 @@
     header.top{max-width:760px; margin-inline:auto; width:100%; padding-inline:20px;}
     main{max-width:760px; margin-inline:auto; width:100%; padding-inline:20px;}
     .brand-row{width:calc(100% + 40px); margin-inline:-20px;}
-    .tabbar{flex-wrap:nowrap; overflow-x:auto; scrollbar-width:thin;}
+    /* Fixed-size tool-section bar (Сводка/Проекты/Визитница/Почта/Автоматизация
+       + one "Сотрудники" picker pill) always fits on one line now that the
+       team roster lives in its own overlay instead of inline pills — no more
+       horizontal scroll/clipping regardless of how many employees exist. */
     .tab-btn, .subnav button, .btn, .filters button, .event-chip,
     .task-row, .board-card, .sum-row, .contact-card, .choice-btn{cursor:pointer;}
     .task-row:hover, .board-card:hover, .sum-row:hover, .contact-card:hover{border-color:var(--accent); box-shadow:var(--shadow-2);}
@@ -609,6 +643,35 @@
   </div>
 </div>
 
+<!-- ===== Employee picker — keeps the top bar a fixed handful of tool
+     sections no matter how many people are on the team ===== -->
+<div class="sheet-overlay" id="empPickerOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Сотрудники</h2><button class="sheet-close" id="empPickerClose">Закрыть</button></div>
+    <div id="empPickerList" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</div>
+
+<!-- ===== Согласование СЗ — новая заявка. Структурная форма + вложение +
+     построение фиксированной цепочки согласующих (кликом по списку людей,
+     порядок = порядок кликов). ===== -->
+<div class="sheet-overlay" id="apprFormOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Новая заявка на согласование</h2><button class="sheet-close" id="apprFormClose">Закрыть</button></div>
+    <div id="apprFormBody"></div>
+  </div>
+</div>
+
+<!-- ===== Согласование СЗ — карточка заявки: поля, вложение, цепочка
+     с статусами по шагам, журнал действий, кнопки Согласовать/Отклонить
+     для того, чья сейчас очередь. ===== -->
+<div class="sheet-overlay" id="apprDetailOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="apprDetailTitle">Заявка</h2><button class="sheet-close" id="apprDetailClose">Закрыть</button></div>
+    <div id="apprDetailBody"></div>
+  </div>
+</div>
+
 <!-- ===== Global voice assistant sheet (unified — same panel, reachable from any tab) ===== -->
 <div class="sheet-overlay" id="assistantOverlay" hidden>
   <div class="sheet">
@@ -646,6 +709,22 @@
       .then(function(data){
         if(data.error) return Promise.reject(new Error(data.error.message||'upload failed'));
         return {id: data.secure_url, url: data.secure_url};
+      });
+  }
+
+  // Generic-document variant for Согласования attachments: unlike photos
+  // (uploadToCloudinary above, hardcoded to the /image/ endpoint), a СЗ
+  // scan may be a PDF or a phone photo — /auto/upload lets Cloudinary pick
+  // the right resource type for whatever was attached.
+  function uploadDocToCloudinary(file){
+    var fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY.upload_preset);
+    return fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY.cloud_name+'/auto/upload', {method:'POST', body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.error) return Promise.reject(new Error(data.error.message||'upload failed'));
+        return {url: data.secure_url, name: file.name};
       });
   }
 
@@ -855,6 +934,18 @@
   var subscribed = {};             // id -> true
   var contacts = [];
   var automationRules = [];        // [{id,trig,action,active,created_at}]
+  // Approval requests ("СЗ на согласование"). Structure (the "ТЗ" for this
+  // feature): one flat Firestore collection, every request a fixed snapshot
+  // of who must sign off in what order. See renderApprovalsTab() below and
+  // claude/approval-system-tz.md in the project for the full design writeup.
+  // {id, type:'sz', title, initiator_id, initiator_name, created_at, updated_at,
+  //  fields:{basis,purpose,amount,period,department,note}, file_url, file_name,
+  //  chain:[{step,approver_id,approver_name,status:'pending'|'approved'|'declined',decided_at,comment}],
+  //  current_step, status:'in_review'|'approved'|'declined'|'cancelled', history:[{at,who_id,who_name,action,step,comment}]}
+  var approvalRequests = [];
+  var apprChainDraft = [];          // [{id,name}] — being built while the new-request sheet is open
+  var apprFormFileChosen = null;    // File object picked for upload, until submit
+  var apprDetailId = null;          // which request the detail sheet currently shows
   var uiState = {};                // id -> {view, calY, calM, filter}
   var activeTab = 'summary';
   var dayModal = null;             // {slug, iso, mode}
@@ -918,23 +1009,57 @@
   // ===================================================================
   // TAB BAR
   // ===================================================================
+  // The top bar is split into two kinds of pills, by design (not by accident):
+  // fixed TOOL SECTIONS (Сводка/Проекты/Визитница/Почта/Автоматизация — always
+  // the same handful, so the bar never grows and never needs to scroll/clip on
+  // desktop) and a single "Сотрудники" picker pill that opens an overlay list —
+  // that's where the team roster lives, so adding the 20th employee never makes
+  // the bar wider. activeEmpTab() finds which (if any) employee tab is current.
+  function activeEmpTab(){
+    return employees.find(function(e){ return e.id===activeTab; }) || null;
+  }
   function renderTabbar(){
     var bar = document.getElementById('tabbar');
+    var curEmp = activeEmpTab();
     var html = '<button class="tab-btn'+(activeTab==='summary'?' active':'')+'" data-tab="summary">Сводка</button>';
     html += '<button class="tab-btn'+(activeTab==='projects'?' active':'')+'" data-tab="projects">Проекты</button>';
-    employees.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}).forEach(function(e){
-      html += '<button class="tab-btn'+(activeTab===e.id?' active':'')+'" data-tab="'+esc(e.id)+'" title="'+esc(e.name)+'">'+esc(givenName(e.name))+'</button>';
-    });
+    html += '<button class="tab-btn'+(activeTab==='approvals'?' active':'')+'" data-tab="approvals">Согласования</button>';
+    html += '<button class="tab-btn tab-btn-picker'+(curEmp?' active':'')+'" id="empPickerBtn">'+
+      (curEmp ? esc(givenName(curEmp.name)) : 'Сотрудники') + ' <span class="tab-caret">▾</span></button>';
     html += '<button class="tab-btn'+(activeTab==='contacts'?' active':'')+'" data-tab="contacts">Визитница</button>';
     html += '<button class="tab-btn'+(activeTab==='mail'?' active':'')+'" data-tab="mail">Почта</button>';
     html += '<button class="tab-btn'+(activeTab==='automation'?' active':'')+'" data-tab="automation">Автоматизация</button>';
-    if(canWrite) html += '<button class="tab-btn ghost-add" id="addEmpTabBtn" title="Добавить сотрудника">+</button>';
     bar.innerHTML = html;
     bar.querySelectorAll('.tab-btn[data-tab]').forEach(function(b){
       b.addEventListener('click', function(){ activeTab = b.getAttribute('data-tab'); renderAll(); });
     });
-    var addBtn = document.getElementById('addEmpTabBtn');
-    if(addBtn) addBtn.addEventListener('click', function(){ openEmpSheet(null); });
+    var pickerBtn = document.getElementById('empPickerBtn');
+    if(pickerBtn) pickerBtn.addEventListener('click', openEmpPicker);
+  }
+
+  function openEmpPicker(){
+    var overlay = document.getElementById('empPickerOverlay');
+    var list = document.getElementById('empPickerList');
+    list.innerHTML = '';
+    if(!employees.length){
+      var empty = document.createElement('div'); empty.className='empty'; empty.textContent='Сотрудников пока нет.'; list.appendChild(empty);
+    }
+    employees.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}).forEach(function(e){
+      var b = document.createElement('button');
+      b.className = 'choice-btn' + (activeTab===e.id ? ' active' : '');
+      b.textContent = e.name + (e.position ? ' — '+e.position : '');
+      b.addEventListener('click', function(){ activeTab = e.id; overlay.hidden = true; renderAll(); });
+      list.appendChild(b);
+    });
+    if(canWrite){
+      var addBtn = document.createElement('button');
+      addBtn.className = 'btn ghost block';
+      addBtn.style.marginTop = '4px';
+      addBtn.textContent = '+ Добавить сотрудника';
+      addBtn.addEventListener('click', function(){ overlay.hidden = true; openEmpSheet(null); });
+      list.appendChild(addBtn);
+    }
+    overlay.hidden = false;
   }
 
   function renderAll(){
@@ -942,6 +1067,7 @@
     var main = document.getElementById('main');
     if(activeTab==='summary'){ main.innerHTML=''; main.appendChild(renderSummary()); }
     else if(activeTab==='projects'){ main.innerHTML=''; main.appendChild(renderProjectsTab()); }
+    else if(activeTab==='approvals'){ main.innerHTML=''; main.appendChild(renderApprovalsTab()); }
     else if(activeTab==='contacts'){ main.innerHTML=''; main.appendChild(renderContactsTab()); }
     else if(activeTab==='mail'){ main.innerHTML=''; main.appendChild(renderMailTab()); }
     else if(activeTab==='automation'){ main.innerHTML=''; main.appendChild(renderAutomationTab()); }
@@ -1119,6 +1245,335 @@
     });
 
     return wrap;
+  }
+
+  // ===================================================================
+  // APPROVALS TAB ("Согласования") — electronic sign-off for СЗ
+  // (служебная записка) documents. This is the data-model/logic ("ТЗ")
+  // that was asked to be designed first — built directly rather than left
+  // on paper, same as every other phase of this app. Full writeup lives in
+  // the project doc claude/approval-system-tz.md; short version:
+  //
+  //   · One flat collection `approval_requests`. A request can carry BOTH
+  //     an uploaded scan/PDF AND structured fields — either path works,
+  //     neither is required at the expense of the other.
+  //   · The sign-off chain is a FIXED, ORDERED snapshot taken at creation —
+  //     who approves, in what order, never changes mid-flight. Automatic
+  //     routing (who gets put on the chain by default, per process) is
+  //     deliberately NOT built yet — for now a person builds the chain by
+  //     hand when filing the request; that wiring is the explicit next step
+  //     Andrey asked to configure himself later, not an oversight here.
+  //   · "Electronic confirmation" = a Согласовать/Отклонить action tied to
+  //     whoAmIEmployee() — the real operator of this browser/device, not
+  //     just whichever employee tab happens to be open — stamped with a
+  //     timestamp. A decline always requires a written reason.
+  //   · Every transition is appended to `history`, so a request carries a
+  //     readable audit trail, not just a final status.
+  // ===================================================================
+  function apprStatusLabel(s){
+    return {in_review:'На согласовании', approved:'Согласовано', declined:'Отклонено', cancelled:'Отменена'}[s] || s;
+  }
+  function apprStepIcon(s){
+    return {pending:'⏳', approved:'✅', declined:'❌'}[s] || '';
+  }
+
+  function renderApprovalsTab(){
+    var wrap = document.createElement('div');
+    wrap.className = 'panel';
+    wrap.style.paddingBottom = '70px';
+
+    var me = whoAmIEmployee();
+
+    var hint = document.createElement('p');
+    hint.style.cssText = 'margin:0 0 4px;font-size:12.5px;color:var(--ink-dim);';
+    hint.textContent = 'Электронное согласование служебных записок (СЗ): заявка идёт по цепочке согласующих по порядку, каждый подтверждает или отклоняет свой шаг. Кто автоматически попадает в цепочку по каждому процессу — настроим отдельно; пока цепочка собирается вручную при создании заявки.';
+    wrap.appendChild(hint);
+
+    if(canWrite){
+      var newBtn = document.createElement('button');
+      newBtn.className = 'btn primary block';
+      newBtn.textContent = '+ Новая заявка (СЗ)';
+      newBtn.addEventListener('click', openApprovalForm);
+      wrap.appendChild(newBtn);
+    }
+
+    if(!approvalRequests.length){
+      var empty = document.createElement('div'); empty.className='empty'; empty.style.marginTop='10px';
+      empty.textContent = 'Заявок пока нет.';
+      wrap.appendChild(empty);
+      return wrap;
+    }
+
+    var sorted = approvalRequests.slice().sort(function(a,b){ return (b.created_at||'').localeCompare(a.created_at||''); });
+    var waitingOnMe = me ? sorted.filter(function(r){
+      return r.status==='in_review' && r.chain && r.chain[r.current_step-1] && r.chain[r.current_step-1].approver_id===me.id;
+    }) : [];
+
+    if(waitingOnMe.length){
+      var wh = document.createElement('div');
+      wh.style.cssText = 'font-size:12px;font-weight:700;color:var(--ink-dim);margin-top:6px;';
+      wh.textContent = 'ЖДЁТ ВАШЕГО РЕШЕНИЯ';
+      wrap.appendChild(wh);
+      waitingOnMe.forEach(function(r){ wrap.appendChild(renderApprCard(r, true)); });
+
+      var allH = document.createElement('div');
+      allH.style.cssText = 'font-size:12px;font-weight:700;color:var(--ink-dim);margin-top:10px;';
+      allH.textContent = 'ВСЕ ЗАЯВКИ';
+      wrap.appendChild(allH);
+    }
+
+    sorted.forEach(function(r){ wrap.appendChild(renderApprCard(r, false)); });
+    return wrap;
+  }
+
+  function renderApprCard(r, highlight){
+    var card = document.createElement('div');
+    card.className = 'appr-card';
+    card.style.marginBottom = '10px';
+    if(highlight) card.style.boxShadow = '0 0 0 1.5px var(--accent) inset';
+    var step = r.chain && r.chain[r.current_step-1];
+    card.innerHTML = '<h3><span>'+esc(r.title)+'</span><span class="appr-badge '+esc(r.status)+'">'+esc(apprStatusLabel(r.status))+'</span></h3>' +
+      '<div class="appr-meta">От: '+esc(r.initiator_name||'—')+' · '+esc(fmtHuman((r.created_at||'').slice(0,10)))+'</div>' +
+      (r.status==='in_review' && step ? '<div class="appr-waiting">Очередь: '+esc(step.approver_name)+' (шаг '+r.current_step+' из '+r.chain.length+')</div>' : '');
+    card.addEventListener('click', function(){ openApprovalDetail(r.id); });
+    return card;
+  }
+
+  // --- new request form ---
+  function openApprovalForm(){
+    apprChainDraft = [];
+    apprFormFileChosen = null;
+    renderApprovalForm();
+    document.getElementById('apprFormOverlay').hidden = false;
+  }
+
+  function renderApprovalForm(){
+    var body = document.getElementById('apprFormBody');
+    if(!body) return;
+    body.innerHTML =
+      '<div class="field"><label>Заголовок</label><input type="text" id="apfTitle" placeholder="например: СЗ — закупка материалов K-PARK"></div>' +
+      '<div class="grid2"><div class="field"><label>Основание</label><input type="text" id="apfBasis" placeholder="на основании чего"></div>' +
+      '<div class="field"><label>Назначение</label><input type="text" id="apfPurpose" placeholder="на что"></div></div>' +
+      '<div class="grid2"><div class="field"><label>Сумма</label><input type="text" id="apfAmount" placeholder="если применимо"></div>' +
+      '<div class="field"><label>Срок</label><input type="text" id="apfPeriod" placeholder="например, до 30.10"></div></div>' +
+      '<div class="field"><label>Подразделение</label><input type="text" id="apfDept" placeholder="необязательно"></div>' +
+      '<div class="field"><label>Комментарий</label><textarea id="apfNote" placeholder="доп. детали"></textarea></div>' +
+      '<div class="field"><label>Файл СЗ (сканы/фото/PDF) — необязательно</label>' +
+      '<label class="btn sm ghost" style="position:relative;overflow:hidden;display:inline-block;" id="apfFileLbl">📎 Прикрепить файл<input type="file" id="apfFile" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label></div>' +
+      '<div class="field"><label>Цепочка согласования (по порядку)</label>' +
+      '<div id="apfChainChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>' +
+      '<div id="apfChainPicker" style="display:flex;flex-direction:column;gap:6px;"></div></div>' +
+      '<div class="row2"><button class="btn ghost" style="flex:1" id="apfCancel">Отмена</button><button class="btn primary" style="flex:2" id="apfSubmit">Отправить на согласование</button></div>';
+
+    var fileInput = body.querySelector('#apfFile');
+    fileInput.addEventListener('change', function(){
+      apprFormFileChosen = fileInput.files[0] || null;
+      var lbl = body.querySelector('#apfFileLbl');
+      if(apprFormFileChosen) lbl.innerHTML = '📎 '+esc(apprFormFileChosen.name)+'<input type="file" id="apfFile" style="position:absolute;inset:0;opacity:0;cursor:pointer;">';
+    });
+
+    renderApfChainUI();
+
+    body.querySelector('#apfCancel').addEventListener('click', function(){ document.getElementById('apprFormOverlay').hidden = true; });
+    body.querySelector('#apfSubmit').addEventListener('click', submitApprovalForm);
+  }
+
+  function renderApfChainUI(){
+    var body = document.getElementById('apprFormBody');
+    if(!body) return;
+    var chips = body.querySelector('#apfChainChips');
+    chips.innerHTML = '';
+    apprChainDraft.forEach(function(c, i){
+      var chip = document.createElement('span');
+      chip.className = 'appr-chip';
+      chip.innerHTML = (i+1)+'. '+esc(givenName(c.name))+' <button class="rm" type="button">×</button>';
+      chip.querySelector('.rm').addEventListener('click', function(){
+        apprChainDraft = apprChainDraft.filter(function(x){ return x.id!==c.id; });
+        renderApfChainUI();
+      });
+      chips.appendChild(chip);
+    });
+    var picker = body.querySelector('#apfChainPicker');
+    picker.innerHTML = '';
+    employees.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}).forEach(function(e){
+      var already = apprChainDraft.some(function(c){ return c.id===e.id; });
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn sm ghost';
+      b.style.justifyContent = 'flex-start';
+      b.disabled = already;
+      b.textContent = (already ? '✓ ' : '+ ') + e.name + (e.position?' — '+e.position:'');
+      b.addEventListener('click', function(){
+        if(already) return;
+        apprChainDraft.push({id:e.id, name:e.name});
+        renderApfChainUI();
+      });
+      picker.appendChild(b);
+    });
+  }
+
+  function submitApprovalForm(){
+    var body = document.getElementById('apprFormBody');
+    var title = body.querySelector('#apfTitle').value.trim();
+    if(!title){ body.querySelector('#apfTitle').focus(); return; }
+    if(!apprChainDraft.length){ alert('Добавьте хотя бы одного согласующего в цепочку.'); return; }
+    if(!dbNs) return;
+    var me = whoAmIEmployee();
+    var submitBtn = body.querySelector('#apfSubmit');
+    submitBtn.disabled = true; submitBtn.textContent = 'Отправляю…';
+
+    var fields = {
+      basis: body.querySelector('#apfBasis').value.trim(),
+      purpose: body.querySelector('#apfPurpose').value.trim(),
+      amount: body.querySelector('#apfAmount').value.trim(),
+      period: body.querySelector('#apfPeriod').value.trim(),
+      department: body.querySelector('#apfDept').value.trim(),
+      note: body.querySelector('#apfNote').value.trim()
+    };
+
+    var reenable = function(){ submitBtn.disabled = false; submitBtn.textContent = 'Отправить на согласование'; };
+    var doneUpload = apprFormFileChosen ? uploadDocToCloudinary(apprFormFileChosen) : Promise.resolve(null);
+    doneUpload.then(function(uploaded){
+      var now = new Date().toISOString();
+      var chain = apprChainDraft.map(function(c, i){
+        return {step:i+1, approver_id:c.id, approver_name:c.name, status:'pending', decided_at:null, comment:''};
+      });
+      var doc = {
+        type:'sz',
+        title: title,
+        initiator_id: me ? me.id : null,
+        initiator_name: me ? me.name : 'Неизвестно',
+        created_at: now, updated_at: now,
+        fields: fields,
+        file_url: uploaded ? uploaded.url : null,
+        file_name: uploaded ? uploaded.name : null,
+        chain: chain,
+        current_step: 1,
+        status: 'in_review',
+        history: [{at:now, who_id: me?me.id:null, who_name: me?me.name:'Неизвестно', action:'created', step:0, comment:''}]
+      };
+      return dbNs.collection('approval_requests').add(doc);
+    }).then(function(){
+      reenable();
+      document.getElementById('apprFormOverlay').hidden = true;
+    }).catch(function(err){
+      reenable();
+      alert('Не удалось отправить заявку: ' + (err && err.message ? err.message : 'ошибка'));
+    });
+  }
+
+  // --- detail / approve / decline ---
+  function openApprovalDetail(id){
+    apprDetailId = id;
+    renderApprovalDetail();
+    document.getElementById('apprDetailOverlay').hidden = false;
+  }
+
+  function renderApprovalDetail(){
+    var r = approvalRequests.find(function(x){ return x.id===apprDetailId; });
+    var body = document.getElementById('apprDetailBody');
+    if(!r || !body){ document.getElementById('apprDetailOverlay').hidden = true; return; }
+    document.getElementById('apprDetailTitle').textContent = r.title;
+
+    var me = whoAmIEmployee();
+    var step = r.chain[r.current_step-1];
+    var myTurn = r.status==='in_review' && step && me && step.approver_id===me.id;
+    var iAmInitiator = me && r.initiator_id===me.id;
+
+    var statusClass = r.status==='approved' ? 'good' : (r.status==='declined' ? 'bad' : (r.status==='in_review' ? 'warn' : ''));
+    var html = '<div class="status-line'+(statusClass?' '+statusClass:'')+'">'+esc(apprStatusLabel(r.status))+
+      (r.status==='in_review' && step ? ' · очередь: '+esc(step.approver_name) : '')+'</div>';
+
+    html += '<div class="appr-field-row"><span class="k">Инициатор</span><span class="v">'+esc(r.initiator_name||'—')+'</span></div>';
+    html += '<div class="appr-field-row"><span class="k">Создана</span><span class="v">'+esc(fmtHuman((r.created_at||'').slice(0,10)))+'</span></div>';
+    var f = r.fields || {};
+    if(f.basis) html += '<div class="appr-field-row"><span class="k">Основание</span><span class="v">'+esc(f.basis)+'</span></div>';
+    if(f.purpose) html += '<div class="appr-field-row"><span class="k">Назначение</span><span class="v">'+esc(f.purpose)+'</span></div>';
+    if(f.amount) html += '<div class="appr-field-row"><span class="k">Сумма</span><span class="v">'+esc(f.amount)+'</span></div>';
+    if(f.period) html += '<div class="appr-field-row"><span class="k">Срок</span><span class="v">'+esc(f.period)+'</span></div>';
+    if(f.department) html += '<div class="appr-field-row"><span class="k">Подразделение</span><span class="v">'+esc(f.department)+'</span></div>';
+    if(f.note) html += '<p style="margin:4px 0 0;font-size:13px;">'+esc(f.note)+'</p>';
+    if(r.file_url) html += '<p style="margin:6px 0 0;"><a href="'+esc(r.file_url)+'" target="_blank" rel="noopener" class="btn sm ghost">📎 '+esc(r.file_name||'Открыть файл')+'</a></p>';
+
+    html += '<div style="font-size:12px;color:var(--ink-dim);font-weight:600;margin:10px 0 2px;">ЦЕПОЧКА СОГЛАСОВАНИЯ</div>';
+    r.chain.forEach(function(s, i){
+      html += '<div class="appr-chain-step'+(r.status==='in_review'&&i===r.current_step-1?' cur':'')+'">' +
+        '<span class="num">'+(i+1)+'</span><span class="who">'+esc(s.approver_name)+'</span>' +
+        '<span>'+apprStepIcon(s.status)+'</span>' +
+        (s.decided_at ? '<span style="font-size:11px;color:var(--ink-dim);">'+esc(fmtHuman(s.decided_at.slice(0,10)))+'</span>' : '') +
+        (s.comment ? '<div class="comment">«'+esc(s.comment)+'»</div>' : '') +
+        '</div>';
+    });
+
+    body.innerHTML = html;
+
+    if(myTurn){
+      var actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+      actions.innerHTML =
+        '<button class="btn primary block" id="apdApprove">✅ Согласовать</button>' +
+        '<div class="field"><label>Причина отклонения (обязательно при отклонении)</label><textarea id="apdDeclineReason" placeholder="например: нет бюджета, нужны уточнения…"></textarea></div>' +
+        '<button class="btn danger block" id="apdDecline">❌ Отклонить</button>';
+      body.appendChild(actions);
+      actions.querySelector('#apdApprove').addEventListener('click', function(){ approvalAct(r.id, 'approve', ''); });
+      actions.querySelector('#apdDecline').addEventListener('click', function(){
+        var reason = actions.querySelector('#apdDeclineReason').value.trim();
+        if(!reason){ actions.querySelector('#apdDeclineReason').focus(); return; }
+        approvalAct(r.id, 'decline', reason);
+      });
+    } else if(iAmInitiator && r.status==='in_review'){
+      var cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn ghost block';
+      cancelBtn.style.marginTop = '12px';
+      cancelBtn.textContent = 'Отменить заявку';
+      cancelBtn.addEventListener('click', function(){ approvalAct(r.id, 'cancel', ''); });
+      body.appendChild(cancelBtn);
+    }
+
+    if(r.history && r.history.length>1){
+      var hist = document.createElement('div');
+      hist.style.cssText = 'margin-top:12px;';
+      hist.innerHTML = '<div style="font-size:12px;color:var(--ink-dim);font-weight:600;margin-bottom:2px;">ЖУРНАЛ</div>';
+      r.history.slice().reverse().forEach(function(h){
+        var row = document.createElement('div');
+        row.className = 'appr-hist-row';
+        var actLabel = {created:'создал заявку', approved:'согласовал шаг '+h.step, declined:'отклонил (' + h.comment + ')', cancelled:'отменил заявку'}[h.action] || h.action;
+        row.textContent = fmtHuman((h.at||'').slice(0,10)) + ' — ' + (h.who_name||'—') + ': ' + actLabel;
+        hist.appendChild(row);
+      });
+      body.appendChild(hist);
+    }
+  }
+
+  function approvalAct(id, kind, comment){
+    if(!dbNs) return;
+    var r = approvalRequests.find(function(x){ return x.id===id; });
+    if(!r) return;
+    var me = whoAmIEmployee();
+    var now = new Date().toISOString();
+    var chain = r.chain.map(function(s){ return Object.assign({}, s); });
+    var historyEntry, patch = { updated_at: now };
+
+    if(kind==='approve'){
+      var idx = r.current_step-1;
+      chain[idx].status = 'approved'; chain[idx].decided_at = now;
+      historyEntry = {at:now, who_id:me?me.id:null, who_name:me?me.name:'Неизвестно', action:'approved', step:r.current_step, comment:''};
+      if(r.current_step >= chain.length){ patch.status = 'approved'; }
+      else { patch.status = 'in_review'; patch.current_step = r.current_step + 1; }
+      patch.chain = chain;
+    } else if(kind==='decline'){
+      var idx2 = r.current_step-1;
+      chain[idx2].status = 'declined'; chain[idx2].decided_at = now; chain[idx2].comment = comment;
+      historyEntry = {at:now, who_id:me?me.id:null, who_name:me?me.name:'Неизвестно', action:'declined', step:r.current_step, comment:comment};
+      patch.status = 'declined';
+      patch.chain = chain;
+    } else if(kind==='cancel'){
+      historyEntry = {at:now, who_id:me?me.id:null, who_name:me?me.name:'Неизвестно', action:'cancelled', step:0, comment:''};
+      patch.status = 'cancelled';
+    } else { return; }
+
+    patch.history = (r.history||[]).concat([historyEntry]);
+    dbNs.doc('approval_requests/'+id).update(patch);
   }
 
   // ===================================================================
@@ -2119,6 +2574,22 @@
     whoOverlay.hidden = false;
   }
 
+  // ===== Employee picker overlay wiring =====
+  var empPickerOverlay = document.getElementById('empPickerOverlay');
+  var empPickerCloseBtn = document.getElementById('empPickerClose');
+  if(empPickerCloseBtn) empPickerCloseBtn.addEventListener('click', function(){ empPickerOverlay.hidden = true; });
+  if(empPickerOverlay) empPickerOverlay.addEventListener('click', function(e){ if(e.target===empPickerOverlay) empPickerOverlay.hidden = true; });
+
+  // ===== Approvals (Согласования) overlay wiring =====
+  var apprFormOverlay = document.getElementById('apprFormOverlay');
+  var apprFormCloseBtn = document.getElementById('apprFormClose');
+  if(apprFormCloseBtn) apprFormCloseBtn.addEventListener('click', function(){ apprFormOverlay.hidden = true; });
+  if(apprFormOverlay) apprFormOverlay.addEventListener('click', function(e){ if(e.target===apprFormOverlay) apprFormOverlay.hidden = true; });
+  var apprDetailOverlay = document.getElementById('apprDetailOverlay');
+  var apprDetailCloseBtn = document.getElementById('apprDetailClose');
+  if(apprDetailCloseBtn) apprDetailCloseBtn.addEventListener('click', function(){ apprDetailOverlay.hidden = true; apprDetailId = null; });
+  if(apprDetailOverlay) apprDetailOverlay.addEventListener('click', function(e){ if(e.target===apprDetailOverlay){ apprDetailOverlay.hidden = true; apprDetailId = null; } });
+
   // ===== Global voice assistant FAB — unifies the one assistant across
   // every tab instead of only inside "Визитница" =====
   var assistantOverlay = document.getElementById('assistantOverlay');
@@ -2997,6 +3468,12 @@
     dbNs.collection('automation_rules').onSnapshot(function(snap){
       automationRules = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
       if(activeTab==='automation') renderAll();
+    }, function(){});
+    dbNs.collection('approval_requests').onSnapshot(function(snap){
+      approvalRequests = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      if(activeTab==='approvals') renderAll();
+      var apprDetailOv = document.getElementById('apprDetailOverlay');
+      if(apprDetailOv && !apprDetailOv.hidden) renderApprovalDetail();
     }, function(){});
   }
 
