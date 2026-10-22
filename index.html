@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Задачи и контакты АКК</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,6 +114,18 @@
   }
   .tab-btn.active{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600; box-shadow:0 2px 7px rgba(42,120,214,.35);}
   .tab-btn.ghost-add{color:var(--ink-dim); border-style:dashed;}
+
+  /* --- notification bell: lives in the header, not a 3rd floating circle —
+       both screen corners are already spoken for (.fab right / .fab-voice
+       left) on tabs like Визитница, so a bell FAB would collide there. --- */
+  .bell-btn{position:relative; flex:none; border:0; background:none; color:var(--ink); font-size:19px; cursor:pointer; padding:4px 6px; line-height:1;}
+  .bell-dot{position:absolute; top:1px; right:2px; width:9px; height:9px; border-radius:50%; background:var(--bad); border:1.5px solid var(--surface);}
+  .notif-item{display:flex; align-items:flex-start; gap:8px; padding:10px 0; border-top:1px solid var(--line); font-size:13px;}
+  .notif-item:first-of-type{border-top:none;}
+  .notif-item.unread{font-weight:600;}
+  .notif-item .notif-text{flex:1;}
+  .notif-item .notif-when{font-size:11px; color:var(--ink-dim); font-family:var(--font-mono); white-space:nowrap;}
+  .notif-item .notif-ack{flex:none; border:0; background:none; color:var(--ink-dim); cursor:pointer; font-size:16px; padding:2px 4px;}
 
   /* --- global voice assistant FAB: left corner so it never overlaps the
        visitnitsa's own "add contact" FAB (right corner) on any tab --- */
@@ -517,6 +531,7 @@
     <div class="brand-logo" id="brandLogo"><img src="https://res.cloudinary.com/gptmnxzl/image/upload/v1791376791/akk_logo.png" alt="АКК"></div>
     <h1>Задачи и контакты АКК</h1>
     <span class="brand-sub">Ассоциация корейцев Казахстана</span>
+    <button class="bell-btn" id="notifBellBtn" title="Уведомления" aria-label="Уведомления">🔔<span class="bell-dot" id="notifBellDot" hidden></span></button>
   </div>
   <div class="tabbar" id="tabbar"></div>
 </header>
@@ -652,6 +667,14 @@
   </div>
 </div>
 
+<!-- ===== Уведомления (вывод автоматизации) ===== -->
+<div class="sheet-overlay" id="notifOverlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Уведомления</h2><button class="sheet-close" id="notifClose">Закрыть</button></div>
+    <div id="notifBody"></div>
+  </div>
+</div>
+
 <!-- ===== Согласование СЗ — новая заявка. Структурная форма + вложение +
      построение фиксированной цепочки согласующих (кликом по списку людей,
      порядок = порядок кликов). ===== -->
@@ -684,12 +707,15 @@
 <!-- Firebase (Firestore) compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<!-- Google Identity Services — OAuth2 token flow for «Почта» (Gmail API), client-side only. -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 (function(){
   var FIREBASE_CONFIG = {"apiKey": "AIzaSyCBdkZrB83XPcmxY9xhPTRHT9py0KT8ExM", "authDomain": "assosiation-45784.firebaseapp.com", "projectId": "assosiation-45784", "storageBucket": "assosiation-45784.firebasestorage.app", "messagingSenderId": "1015320794110", "appId": "1:1015320794110:web:884ca6db4cb2f5ec4366af", "measurementId": "G-3GG3VJVP79"};
   var CLOUDINARY = { cloud_name: "gptmnxzl", upload_preset: "AKK upload" };
   var GEMINI_MODEL = 'gemini-flash-lite-latest';
   var GEMINI_KEY_STORAGE = 'akk_gemini_key';
+  var GOOGLE_CLIENT_ID_STORAGE = 'akk_google_client_id';
 
   firebase.initializeApp(FIREBASE_CONFIG);
   var dbInstance = firebase.firestore();
@@ -699,6 +725,16 @@
   // Exposed so the app's own UI (the "paste your key" inline prompt) can
   // read/write it without reaching into this closure.
   window.AKK_GEMINI_KEY = { get: getGeminiKey, set: setGeminiKey };
+
+  // Same pattern as the Gemini key above, for the Gmail OAuth Client ID
+  // (see «Почта» tab): a per-device value the person pastes in themselves
+  // from their own Google Cloud Console, never something Claude asks for
+  // or stores. The Client ID is not a secret (it's meant to be public in
+  // client-side apps — Google's own docs say so), unlike an API key or
+  // token, but it still lives only in this browser's localStorage.
+  function getGoogleClientId(){ try{ return localStorage.getItem(GOOGLE_CLIENT_ID_STORAGE) || ''; }catch(e){ return ''; } }
+  function setGoogleClientId(v){ try{ if(v) localStorage.setItem(GOOGLE_CLIENT_ID_STORAGE, v); else localStorage.removeItem(GOOGLE_CLIENT_ID_STORAGE); }catch(e){} }
+  window.AKK_GOOGLE_CLIENT_ID = { get: getGoogleClientId, set: setGoogleClientId };
 
   function uploadToCloudinary(file){
     var fd = new FormData();
@@ -946,6 +982,33 @@
   var apprChainDraft = [];          // [{id,name}] — being built while the new-request sheet is open
   var apprFormFileChosen = null;    // File object picked for upload, until submit
   var apprDetailId = null;          // which request the detail sheet currently shows
+
+  // Notifications — real output of the automation engine (see "AUTOMATION
+  // ENGINE" below): structural events (согласование waiting on you, задача
+  // approaching its deadline) plus freeform automation_rules interpreted by
+  // Gemini both land here as {id, employee_id, text, source, read, created_at}.
+  // Loaded whole (like automationRules/approvalRequests above) — this app's
+  // whole-collection-client-side pattern, filtered by whoAmIEmployee() at
+  // render time, not at the query.
+  var notifications = [];
+  var notifOverlayOpen = false;
+  // Known projects (Этап 2 doplnenie): lets a project show up in the
+  // «Проекты» tab and in the assistant's suggestions even before any task
+  // is tagged with it yet — the original design only showed a project once
+  // at least one task referenced it.
+  var knownProjects = [];           // [{id,name,created_at}]
+
+  // Gmail (Этап 3) — client-side OAuth2 token flow via Google Identity
+  // Services, same per-device-key philosophy as the Gemini key above: the
+  // OAuth Client ID is pasted in by whoever sets this up, from their own
+  // Google Cloud Console, never asked for or stored by Claude. The access
+  // token itself lives only in memory (never localStorage) — it's short-
+  // lived (~1h) and re-requesting it is one click via gmailSignIn().
+  var gmailToken = null;
+  var gmailTokenClient = null;
+  var gmailRecent = [];             // last fetched inbox snapshot — [{id,from,subject,snippet}]
+  var gmailBusy = false;
+  var gmailError = '';
   var uiState = {};                // id -> {view, calY, calM, filter}
   var activeTab = 'summary';
   var dayModal = null;             // {slug, iso, mode}
@@ -1074,6 +1137,7 @@
     else { main.innerHTML=''; main.appendChild(renderEmployeeTab(activeTab)); }
     var aOverlay = document.getElementById('assistantOverlay');
     if(aOverlay && !aOverlay.hidden) renderGlobalAssistant();
+    updateNotifBell();
   }
 
   // ===================================================================
@@ -1083,10 +1147,17 @@
   // from the task's edit form (see renderTaskEditForm → #etProject).
   // ===================================================================
   function allProjectNames(){
+    // Merges two sources, by design: projects already carried by at least one
+    // task (ad-hoc, always worked) PLUS projects the team registered in
+    // advance via knownProjects — so a brand-new project (e.g. a future
+    // K-PARK phase) shows up with an empty card before its first task
+    // exists, instead of only appearing retroactively once someone tags a
+    // task with it.
     var set = {};
     employees.forEach(function(e){
       (tasksBySlug[e.id]||[]).forEach(function(t){ if(t.project) set[t.project]=true; });
     });
+    knownProjects.forEach(function(p){ if(p.name) set[p.name]=true; });
     return Object.keys(set).sort(function(a,b){ return a.localeCompare(b,'ru'); });
   }
 
@@ -1099,6 +1170,23 @@
     hint.style.cssText = 'margin:0 0 4px;font-size:12.5px;color:var(--ink-dim);';
     hint.textContent = 'Задачи разных сотрудников, сгруппированные по проекту. Чтобы привязать задачу — откройте её у сотрудника → «Изменить» → впишите название проекта (например, K-PARK, «Би Вумен», Пресс-мониторинг).';
     wrap.appendChild(hint);
+
+    if(canWrite){
+      var addRow = document.createElement('div');
+      addRow.style.cssText = 'display:flex;gap:6px;margin-bottom:4px;';
+      addRow.innerHTML = '<input type="text" id="projAddInput" placeholder="Новый проект (например, K-PARK)" style="flex:1;">'+
+        '<button class="btn sm primary" id="projAddBtn">+ Добавить</button>';
+      wrap.appendChild(addRow);
+      addRow.querySelector('#projAddBtn').addEventListener('click', function(){
+        var input = addRow.querySelector('#projAddInput');
+        var name = input.value.trim();
+        if(!name || !dbNs) return;
+        if(knownProjects.some(function(p){ return p.name===name; }) || allProjectNames().indexOf(name)!==-1){
+          input.value=''; return;
+        }
+        dbNs.collection('known_projects').add({name:name, created_at:new Date().toISOString()}).then(function(){ input.value=''; });
+      });
+    }
 
     var names = allProjectNames();
     var noProjectCount = 0;
@@ -1150,26 +1238,163 @@
   }
 
   // ===================================================================
-  // MAIL TAB — honest placeholder: no Gmail integration is wired up yet
-  // (it needs an OAuth client set up in Google Cloud Console, a decision
-  // Andrey has to make), so for now this gives a working mailto: composer
-  // instead of pretending to show a real inbox.
+  // MAIL TAB — real Gmail API integration (Этап 3), client-side OAuth2
+  // via Google Identity Services (loaded in <head>). No backend — the
+  // same architectural choice as Firestore/Cloudinary/Gemini elsewhere in
+  // this app. Needs a one-time OAuth Client ID from Google Cloud Console
+  // (see claude/akk-dashboard1-runbook.md for the exact steps), pasted
+  // into the field below — never something Claude asks for or stores.
+  // Falls back to the original mailto: composer underneath, which always
+  // works regardless of Gmail sign-in state.
   // ===================================================================
+  function b64urlEncode(str){
+    var utf8 = unescape(encodeURIComponent(str));
+    var b64 = btoa(utf8);
+    return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+
+  function gmailSignIn(onDone){
+    var clientId = window.AKK_GOOGLE_CLIENT_ID.get();
+    if(!clientId){ onDone(new Error('no_client_id')); return; }
+    if(!window.google || !window.google.accounts || !window.google.accounts.oauth2){ onDone(new Error('gis_not_loaded')); return; }
+    if(!gmailTokenClient || gmailTokenClient._clientId!==clientId){
+      gmailTokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly',
+        callback: function(resp){
+          if(resp && resp.access_token){ gmailToken = resp.access_token; onDone(null); }
+          else onDone(new Error((resp && resp.error) || 'auth_failed'));
+        }
+      });
+      gmailTokenClient._clientId = clientId;
+    }
+    gmailTokenClient.requestAccessToken({prompt: gmailToken ? '' : 'consent'});
+  }
+
+  function gmailFetchRecent(){
+    if(!gmailToken) return Promise.reject(new Error('no_token'));
+    return fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=8&labelIds=INBOX', {headers:{Authorization:'Bearer '+gmailToken}})
+      .then(function(r){ if(!r.ok) throw new Error('list_'+r.status); return r.json(); })
+      .then(function(json){
+        var ids = (json.messages||[]).map(function(m){ return m.id; });
+        return Promise.all(ids.map(function(id){
+          return fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+id+'?format=metadata&metadataHeaders=From&metadataHeaders=Subject', {headers:{Authorization:'Bearer '+gmailToken}})
+            .then(function(r){ return r.json(); });
+        }));
+      }).then(function(msgs){
+        gmailRecent = msgs.map(function(m){
+          var headers = (m.payload && m.payload.headers) || [];
+          var get = function(name){ var h = headers.find(function(x){return x.name===name;}); return h ? h.value : ''; };
+          return {id:m.id, from:get('From'), subject:get('Subject')||'(без темы)', snippet:m.snippet||''};
+        });
+      });
+  }
+
+  function gmailSend(to, subject, body){
+    if(!gmailToken) return Promise.reject(new Error('no_token'));
+    var raw = 'To: '+to+'\r\nSubject: '+subject+'\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n'+body;
+    return fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method:'POST', headers:{Authorization:'Bearer '+gmailToken, 'Content-Type':'application/json'},
+      body: JSON.stringify({raw: b64urlEncode(raw)})
+    }).then(function(r){
+      if(!r.ok) return r.json().catch(function(){return{};}).then(function(j){ throw new Error((j.error&&j.error.message)||('send_'+r.status)); });
+      return r.json();
+    });
+  }
+
+  function gmailErrorCopy(e){
+    var m = e && e.message;
+    if(m==='no_client_id') return 'Сначала вставьте Client ID (см. ниже).';
+    if(m==='gis_not_loaded') return 'Google ещё не загрузился — подождите секунду и попробуйте снова.';
+    if(m==='no_token') return 'Сначала нажмите «Войти в Gmail».';
+    if(m && m.indexOf('list_')===0) return 'Не удалось получить письма ('+m.slice(5)+').';
+    return 'Ошибка: '+(m||'неизвестная');
+  }
+
   function renderMailTab(){
     var wrap = document.createElement('div');
     wrap.className = 'panel';
     wrap.style.paddingBottom = '70px';
 
-    var info = document.createElement('div');
-    info.className = 'status-line warn';
-    info.style.cssText = 'flex-direction:column; align-items:stretch; gap:4px;';
-    info.innerHTML = '<div><b>Интеграция с Gmail пока не подключена.</b></div>' +
-      '<div style="font-size:12.5px;">Нужен OAuth-доступ к почтовому ящику АКК через Google Cloud Console — это разовая настройка. Если у ассоциации уже есть отдельная система мониторинга почты — эту вкладку свяжем с ней отдельным шагом, когда это уточнится.</div>';
-    wrap.appendChild(info);
+    var clientId = window.AKK_GOOGLE_CLIENT_ID.get();
+
+    if(!clientId){
+      var setup = document.createElement('div');
+      setup.className = 'status-line warn';
+      setup.style.cssText = 'flex-direction:column;align-items:stretch;gap:8px;';
+      setup.innerHTML =
+        '<div><b>Gmail ещё не подключён на этом устройстве.</b> Нужен Client ID из Google Cloud Console (разовая настройка — шаги в раннбуке проекта). Он не секретный, но хранится только в этом браузере, не у Клода.</div>' +
+        '<div style="display:flex;gap:8px;">' +
+        '<input id="googleClientIdInput" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" style="flex:1;min-width:0;font:inherit;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);">' +
+        '<button type="button" id="googleClientIdSave" class="btn primary sm">Сохранить</button></div>';
+      wrap.appendChild(setup);
+      setup.querySelector('#googleClientIdSave').addEventListener('click', function(){
+        var v = setup.querySelector('#googleClientIdInput').value.trim();
+        if(!v) return;
+        window.AKK_GOOGLE_CLIENT_ID.set(v);
+        renderAll();
+      });
+    } else {
+      var gmailBox = document.createElement('div');
+      gmailBox.className = 'status-line' + (gmailToken ? ' good' : '');
+      gmailBox.style.cssText = 'flex-direction:column;align-items:stretch;gap:8px;';
+      var statusLine = document.createElement('div');
+      statusLine.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;';
+      statusLine.innerHTML = '<span>'+(gmailToken ? '✓ Вход в Gmail выполнен' : 'Gmail подключён, но вход ещё не выполнен')+'</span>' +
+        '<button type="button" id="gmailSignInBtn" class="btn sm '+(gmailToken?'ghost':'primary')+'">'+(gmailToken?'Войти заново':'Войти в Gmail')+'</button>';
+      gmailBox.appendChild(statusLine);
+      if(gmailError){
+        var errLine = document.createElement('div'); errLine.style.cssText='font-size:12px;color:var(--bad);'; errLine.textContent = gmailError;
+        gmailBox.appendChild(errLine);
+      }
+      var changeIdBtn = document.createElement('button');
+      changeIdBtn.className = 'btn sm ghost'; changeIdBtn.style.alignSelf='flex-start'; changeIdBtn.textContent = 'Изменить Client ID';
+      changeIdBtn.addEventListener('click', function(){ window.AKK_GOOGLE_CLIENT_ID.set(''); gmailToken=null; renderAll(); });
+      gmailBox.appendChild(changeIdBtn);
+      wrap.appendChild(gmailBox);
+      statusLine.querySelector('#gmailSignInBtn').addEventListener('click', function(){
+        gmailError = ''; renderAll();
+        gmailSignIn(function(err){
+          if(err){ gmailError = gmailErrorCopy(err); renderAll(); return; }
+          gmailError = '';
+          gmailBusy = true; renderAll();
+          gmailFetchRecent().catch(function(e){ gmailError = gmailErrorCopy(e); }).then(function(){ gmailBusy = false; renderAll(); });
+        });
+      });
+
+      if(gmailToken){
+        var recentWrap = document.createElement('div');
+        recentWrap.style.cssText = 'margin-top:10px;';
+        var recentHead = document.createElement('div');
+        recentHead.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;';
+        recentHead.innerHTML = '<b style="font-size:13px;">Входящие (последние)</b>' +
+          '<button type="button" id="gmailRefreshBtn" class="btn sm ghost">'+(gmailBusy?'…':'↻ Обновить')+'</button>';
+        recentWrap.appendChild(recentHead);
+        recentHead.querySelector('#gmailRefreshBtn').addEventListener('click', function(){
+          gmailBusy = true; gmailError=''; renderAll();
+          gmailFetchRecent().catch(function(e){ gmailError = gmailErrorCopy(e); }).then(function(){ gmailBusy = false; renderAll(); });
+        });
+        if(!gmailRecent.length){
+          var emptyMail = document.createElement('div'); emptyMail.className='empty'; emptyMail.textContent = gmailBusy ? 'Загружаю…' : 'Писем пока не загружено — нажмите «Обновить».';
+          recentWrap.appendChild(emptyMail);
+        } else {
+          gmailRecent.forEach(function(m){
+            var row = document.createElement('div');
+            row.className = 'proj-task-row';
+            row.style.cssText = 'flex-direction:column;align-items:stretch;gap:2px;cursor:default;';
+            row.innerHTML = '<span style="font-weight:600;">'+esc(m.subject)+'</span>' +
+              '<span class="who" style="font-size:11.5px;">'+esc(m.from)+'</span>' +
+              '<span style="font-size:12px;color:var(--ink-dim);">'+esc(m.snippet)+'</span>';
+            recentWrap.appendChild(row);
+          });
+        }
+        wrap.appendChild(recentWrap);
+      }
+    }
 
     var sub = document.createElement('p');
     sub.style.cssText = 'margin:14px 0 2px;font-size:12.5px;color:var(--ink-dim);';
-    sub.textContent = 'Пока — быстрый способ написать письмо через вашу почтовую программу:';
+    sub.textContent = gmailToken ? 'Написать письмо (отправится через Gmail):' : 'Написать письмо — пока через вашу почтовую программу (войдите в Gmail выше, чтобы отправлять прямо отсюда):';
     wrap.appendChild(sub);
 
     var form = document.createElement('div');
@@ -1178,7 +1403,9 @@
       '<div class="field"><label>Кому</label><input type="text" id="mailTo" inputmode="email" placeholder="email@example.com"></div>' +
       '<div class="field"><label>Тема</label><input type="text" id="mailSubj" placeholder="Тема письма"></div>' +
       '<div class="field"><label>Текст</label><textarea id="mailBody" placeholder="Текст письма…"></textarea></div>' +
-      '<button class="btn primary" id="mailOpenBtn">✉ Открыть письмо</button>';
+      '<div id="mailSendStatus" class="status-line" hidden></div>' +
+      (gmailToken ? '<button class="btn primary" id="mailSendBtn">✉ Отправить через Gmail</button><button class="btn ghost" id="mailOpenBtn">Открыть в почтовой программе вместо этого</button>'
+                  : '<button class="btn primary" id="mailOpenBtn">✉ Открыть письмо</button>');
     wrap.appendChild(form);
 
     form.querySelector('#mailOpenBtn').addEventListener('click', function(){
@@ -1189,14 +1416,35 @@
       window.open(href, '_blank');
     });
 
+    var sendBtn = form.querySelector('#mailSendBtn');
+    if(sendBtn) sendBtn.addEventListener('click', function(){
+      var to = form.querySelector('#mailTo').value.trim();
+      var subj = form.querySelector('#mailSubj').value.trim();
+      var body = form.querySelector('#mailBody').value.trim();
+      var statusEl = form.querySelector('#mailSendStatus');
+      if(!to){ form.querySelector('#mailTo').focus(); return; }
+      sendBtn.disabled = true; sendBtn.textContent = 'Отправляю…';
+      statusEl.hidden = true;
+      gmailSend(to, subj, body).then(function(){
+        statusEl.hidden = false; statusEl.className = 'status-line good'; statusEl.textContent = 'Письмо отправлено.';
+        form.querySelector('#mailTo').value=''; form.querySelector('#mailSubj').value=''; form.querySelector('#mailBody').value='';
+      }).catch(function(e){
+        statusEl.hidden = false; statusEl.className = 'status-line bad'; statusEl.textContent = gmailErrorCopy(e);
+      }).then(function(){
+        sendBtn.disabled = false; sendBtn.textContent = '✉ Отправить через Gmail';
+      });
+    });
+
     return wrap;
   }
 
   // ===================================================================
-  // AUTOMATION TAB — team's own "если — то" rules, stored for real in
-  // Firestore (automation_rules) so they persist and are shared by
-  // everyone, but NOT yet executed automatically: this is the checklist
-  // step from the roadmap, before a real rules engine reads these.
+  // AUTOMATION TAB — team's own "если — то" rules, stored in Firestore
+  // (automation_rules) AND now actually executed (see "AUTOMATION ENGINE"
+  // above renderNotifBody): each rule is checked by Gemini against real
+  // events (новая задача, задача выполнена, новая/решённая заявка на
+  // согласование) and, when it matches, produces a real notification (🔔
+  // в шапке) for the right человек — no longer a pure checklist.
   // ===================================================================
   function renderAutomationTab(){
     var wrap = document.createElement('div');
@@ -1205,7 +1453,7 @@
 
     var info = document.createElement('p');
     info.style.cssText = 'margin:0 0 10px;font-size:12.5px;color:var(--ink-dim);';
-    info.textContent = 'Список договорённостей команды в формате «если — то». Это пока чек-лист, не автоматическое выполнение — следующий шаг развития системы научит её выполнять эти правила самостоятельно.';
+    info.textContent = 'Список договорённостей команды в формате «если — то». Правила реально срабатывают: когда происходит подходящее событие (новая задача, задача выполнена, новая или решённая заявка на согласование), система сама решает, подходит ли правило, и присылает уведомление (🔔 вверху) нужному человеку. Требует ключ Gemini хотя бы на одном устройстве — без него правила просто не проверяются, а дедлайны/согласования из колокольчика всё равно работают.';
     wrap.appendChild(info);
 
     if(canWrite){
@@ -2960,7 +3208,7 @@
       },
       {
         name: 'create_automation_rule',
-        description: 'Добавляет правило команды АКК в формате «если — то» во вкладку «Автоматизация». Это пока чек-лист договорённостей, правило ЕЩЁ НЕ выполняется автоматически — предупреди об этом в ответе, если уместно.',
+        description: 'Добавляет правило команды АКК в формате «если — то» во вкладку «Автоматизация». Правило реально проверяется на будущих событиях (новая/выполненная задача, новая/решённая заявка на согласование) и, если подходит, присылает уведомление нужному человеку — это не просто чек-лист.',
         inputSchema: {
           type:'object',
           properties:{ trigger:{type:'string', description:'Условие — «если…»'}, action:{type:'string', description:'Действие — «то…»'} },
@@ -3038,6 +3286,46 @@
             pendingActions.push({type:'event', contact:c.name, event:ev});
             return {ok:true, contact:c.name, event:ev};
           });
+        }
+      },
+      {
+        name: 'list_pending_approvals',
+        description: 'Показывает заявки на согласование (СЗ) во вкладке «Согласования», которые сейчас ждут решения указанного человека (или собеседника, если имя не указано). Используй для вопросов вида «что у меня на согласовании».',
+        inputSchema: {
+          type:'object',
+          properties:{ employee_name:{type:'string', description:'Имя сотрудника, или "me"/пусто — сам собеседник'} },
+          required:[]
+        },
+        execute: function(input){
+          var empName2 = String(input.employee_name||'').trim().toLowerCase();
+          var target = null;
+          if(!empName2 || empName2==='me' || empName2==='я'){ target = me; }
+          else { target = employees.find(function(e){ var n=e.name.toLowerCase(); return n.indexOf(empName2)!==-1 || empName2.indexOf(n)!==-1; }); }
+          if(!target) throw new Error('Сотрудник не найден. Доступные: '+(empList||'нет сотрудников')+'.');
+          var waiting = approvalRequests.filter(function(r){
+            return r.status==='in_review' && r.chain && r.chain[r.current_step-1] && r.chain[r.current_step-1].approver_id===target.id;
+          }).map(function(r){ return {id:r.id, title:r.title, initiator:r.initiator_name, step: r.current_step+'/'+r.chain.length}; });
+          return {employee:target.name, count:waiting.length, items:waiting};
+        }
+      },
+      {
+        name: 'list_my_notifications',
+        description: 'Показывает непрочитанные уведомления (от автоматизации: согласования, дедлайны, сработавшие правила «если-то») для указанного человека, или для собеседника, если имя не указано.',
+        inputSchema: {
+          type:'object',
+          properties:{ employee_name:{type:'string', description:'Имя сотрудника, или "me"/пусто — сам собеседник'} },
+          required:[]
+        },
+        execute: function(input){
+          var empName3 = String(input.employee_name||'').trim().toLowerCase();
+          var target = null;
+          if(!empName3 || empName3==='me' || empName3==='я'){ target = me; }
+          else { target = employees.find(function(e){ var n=e.name.toLowerCase(); return n.indexOf(empName3)!==-1 || empName3.indexOf(n)!==-1; }); }
+          if(!target) throw new Error('Сотрудник не найден. Доступные: '+(empList||'нет сотрудников')+'.');
+          var unread = notifications.filter(function(n){ return n.employee_id===target.id && !n.read; })
+            .slice().sort(function(a,b){ return (b.created_at||'').localeCompare(a.created_at||''); })
+            .map(function(n){ return {text:n.text, source:n.source}; });
+          return {employee:target.name, count:unread.length, items:unread.slice(0,10)};
         }
       }
     ];
@@ -3460,6 +3748,143 @@
   });
 
   // ===================================================================
+  // AUTOMATION ENGINE — turns «Автоматизация» from a checklist nobody
+  // re-reads into rules that actually fire. Two layers:
+  //   1. Structural (plain code, always on, no LLM): a согласование lands
+  //      on your step → you're notified; a задача's срок is сегодня/завтра
+  //      and it isn't done → the responsible person is notified.
+  //   2. Freeform — the rules team actually writes in «Автоматизация», in
+  //      plain Russian «если — то» — interpreted live by Gemini against
+  //      each tracked event, through the same sampleNs capability the
+  //      voice assistant already uses. No Gemini key configured on this
+  //      device → silently skipped, same graceful degradation as the
+  //      assistant elsewhere in this app.
+  // Every firing is deduped via notifications.fired_key, so re-subscribing
+  // (tab reopen, snapshot replay) never notifies twice for the same thing.
+  // ===================================================================
+  var prevTaskState = {};        // empId -> {taskId: status}, to detect real transitions
+  var firstTaskSnapshot = {};    // empId -> true once we've seen one snapshot for it
+  var prevApprState = {};        // requestId -> status, same purpose
+  var firstApprSnapshot = false;
+
+  function ensureNotification(key, employeeId, text, source, ruleId){
+    if(!dbNs || !employeeId || !text) return Promise.resolve();
+    return dbNs.collection('notifications').where('fired_key','==',key).limit(1).get().then(function(snap){
+      if(!snap.empty) return;
+      var doc = {fired_key:key, employee_id:employeeId, text:text, source:source||'rule', read:false, created_at:new Date().toISOString()};
+      if(ruleId) doc.rule_id = ruleId;
+      return dbNs.collection('notifications').add(doc);
+    }).catch(function(){});
+  }
+
+  function interpretAutomationRules(eventObj){
+    if(!sampleNs || !automationRules.length) return;
+    var activeRules = automationRules.filter(function(r){ return r.active!==false; });
+    if(!activeRules.length) return;
+    var rulesText = activeRules.map(function(r){ return r.id+': если «'+r.trig+'» — то «'+r.action+'»'; }).join('\n');
+    var empText = employees.map(function(e){ return e.id+': '+e.name; }).join('\n');
+    var prompt = 'Ты — движок автоматизации внутреннего приложения АКК. Вот действующие правила команды (id: если «...» — то «...»):\n'+rulesText+
+      '\n\nСотрудники (id: имя):\n'+empText+
+      '\n\nПроизошло событие:\n'+JSON.stringify(eventObj) +
+      '\n\nКакие правила относятся к этому событию? Для каждого подходящего правила верни, кого уведомить (employee_id из списка выше — обычно тот, кто отвечает за задачу/заявку из события, если правило не указывает иначе) и короткий текст уведомления на русском, сформулированный из «то…» этого правила применительно именно к этому событию. Если ни одно правило не подходит — пустой список. '+
+      'Отвечай СТРОГО JSON: {"matches":[{"rule_id":"...","employee_id":"...","message":"..."}]}';
+    sampleNs.json(prompt).then(function(res){
+      var matches = (res && res.matches) || [];
+      matches.forEach(function(m){
+        if(!m || !m.employee_id || !m.message) return;
+        ensureNotification('rule_'+m.rule_id+'_'+(eventObj.key||''), m.employee_id, m.message, 'rule', m.rule_id);
+      });
+    }).catch(function(){ /* no/bad key or model hiccup — same silent skip as other optional Gemini features */ });
+  }
+
+  function checkApprovalNotifications(requests, isFirst){
+    requests.forEach(function(r){
+      var prev = prevApprState[r.id];
+      var isNew = (prev === undefined);
+      if(r.status==='in_review' && r.chain && r.chain[r.current_step-1]){
+        var step = r.chain[r.current_step-1];
+        if(step.status==='pending' && step.approver_id){
+          ensureNotification('appr_step_'+r.id+'_'+r.current_step, step.approver_id,
+            'На согласовании: «'+r.title+'» от '+r.initiator_name+' — ваша очередь.', 'approval');
+        }
+      }
+      if((r.status==='approved' || r.status==='declined') && prev && prev!==r.status && r.initiator_id){
+        ensureNotification('appr_final_'+r.id+'_'+r.status, r.initiator_id,
+          (r.status==='approved' ? 'Согласовано целиком: «' : 'Отклонено: «')+r.title+'».', 'approval');
+      }
+      if(!isFirst){
+        if(isNew){
+          interpretAutomationRules({key:'appr_new_'+r.id, type:'approval_created', title:r.title, initiator:r.initiator_name, department:(r.fields&&r.fields.department)||''});
+        } else if(prev!==r.status && (r.status==='approved'||r.status==='declined')){
+          interpretAutomationRules({key:'appr_decided_'+r.id+'_'+r.status, type:'approval_decided', title:r.title, status:r.status, initiator:r.initiator_name});
+        }
+      }
+      prevApprState[r.id] = r.status;
+    });
+  }
+
+  function sweepDeadlines(){
+    if(!dbNs) return;
+    var tomorrow = isoDate(new Date(Date.now()+86400000));
+    employees.forEach(function(e){
+      (tasksBySlug[e.id]||[]).forEach(function(t){
+        if(t.status==='done') return;
+        var d = t.type==='range' ? t.end_date : t.date;
+        if(!d || (d!==todayISO && d!==tomorrow)) return;
+        if(t.last_reminded_date===todayISO) return;
+        var when = d===todayISO ? 'сегодня' : 'завтра';
+        ensureNotification('deadline_'+t.id+'_'+todayISO, e.id, 'Срок '+when+': «'+t.title+'».', 'deadline').then(function(){
+          return dbNs.doc('employees/'+e.id+'/tasks/'+t.id).update({last_reminded_date:todayISO});
+        }).catch(function(){});
+      });
+    });
+  }
+
+  // ===================================================================
+  // NOTIFICATIONS — the visible output of the automation engine above.
+  // ===================================================================
+  function renderNotifBody(){
+    var body = document.getElementById('notifBody');
+    if(!body) return;
+    var me = whoAmIEmployee();
+    if(!me){
+      body.innerHTML = '<div class="empty">Сначала выберите «Кто вы» в голосовом помощнике (🎤) — уведомления привязаны к сотруднику.</div>';
+      return;
+    }
+    var mine = notifications.filter(function(n){ return n.employee_id===me.id; })
+      .slice().sort(function(a,b){ return (b.created_at||'').localeCompare(a.created_at||''); });
+    if(!mine.length){ body.innerHTML = '<div class="empty">Уведомлений пока нет.</div>'; return; }
+    body.innerHTML = '';
+    mine.forEach(function(n){
+      var row = document.createElement('div');
+      row.className = 'notif-item'+(n.read?'':' unread');
+      row.innerHTML = '<span class="notif-text">'+esc(n.text)+'<br><span class="notif-when">'+(n.created_at?fmtAtHuman(n.created_at):'')+'</span></span>'+
+        (n.read?'':'<button class="notif-ack" title="Прочитано">✓</button>');
+      var ack = row.querySelector('.notif-ack');
+      if(ack) ack.addEventListener('click', function(){ if(dbNs) dbNs.doc('notifications/'+n.id).update({read:true}).catch(function(){}); });
+      body.appendChild(row);
+    });
+  }
+
+  function updateNotifBell(){
+    var dot = document.getElementById('notifBellDot');
+    if(!dot) return;
+    var me = whoAmIEmployee();
+    var unread = me ? notifications.filter(function(n){ return n.employee_id===me.id && !n.read; }).length : 0;
+    dot.hidden = !unread;
+    if(notifOverlayOpen) renderNotifBody();
+  }
+
+  var notifBellBtn = document.getElementById('notifBellBtn');
+  var notifOverlayEl = document.getElementById('notifOverlay');
+  if(notifBellBtn) notifBellBtn.addEventListener('click', function(){
+    notifOverlayOpen = true; renderNotifBody(); notifOverlayEl.hidden = false;
+  });
+  var notifCloseBtn = document.getElementById('notifClose');
+  if(notifCloseBtn) notifCloseBtn.addEventListener('click', function(){ notifOverlayOpen = false; notifOverlayEl.hidden = true; });
+  if(notifOverlayEl) notifOverlayEl.addEventListener('click', function(e){ if(e.target===notifOverlayEl){ notifOverlayOpen = false; notifOverlayEl.hidden = true; } });
+
+  // ===================================================================
   // BOOT
   // ===================================================================
   function subscribeEmployee(id){
@@ -3468,8 +3893,25 @@
     tasksBySlug[id] = tasksBySlug[id] || [];
     dayNotesBySlug[id] = dayNotesBySlug[id] || {};
     dbNs.collection('employees/'+id+'/tasks').onSnapshot(function(snap){
-      tasksBySlug[id] = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      var newList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      var isFirst = !firstTaskSnapshot[id];
+      firstTaskSnapshot[id] = true;
+      var prevMap = prevTaskState[id] || {};
+      var nextMap = {};
+      newList.forEach(function(t){
+        nextMap[t.id] = t.status;
+        if(!isFirst){
+          if(!(t.id in prevMap)){
+            interpretAutomationRules({key:'task_created_'+t.id, type:'task_created', employee_id:id, employee_name:empName(id), title:t.title, project:t.project||'', date:t.date||t.start_date||''});
+          } else if(prevMap[t.id]!==t.status && t.status==='done'){
+            interpretAutomationRules({key:'task_done_'+t.id, type:'task_done', employee_id:id, employee_name:empName(id), title:t.title, project:t.project||''});
+          }
+        }
+      });
+      prevTaskState[id] = nextMap;
+      tasksBySlug[id] = newList;
       renderAll();
+      sweepDeadlines();
     }, function(){});
     dbNs.collection('employees/'+id+'/day_notes').onSnapshot(function(snap){
       var map = {};
@@ -3499,11 +3941,24 @@
       if(activeTab==='automation') renderAll();
     }, function(){});
     dbNs.collection('approval_requests').onSnapshot(function(snap){
-      approvalRequests = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      var newRequests = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      checkApprovalNotifications(newRequests, !firstApprSnapshot);
+      firstApprSnapshot = true;
+      approvalRequests = newRequests;
       if(activeTab==='approvals') renderAll();
       var apprDetailOv = document.getElementById('apprDetailOverlay');
       if(apprDetailOv && !apprDetailOv.hidden) renderApprovalDetail();
     }, function(){});
+    dbNs.collection('notifications').onSnapshot(function(snap){
+      notifications = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      updateNotifBell();
+    }, function(){});
+    dbNs.collection('known_projects').onSnapshot(function(snap){
+      knownProjects = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      if(activeTab==='projects') renderAll();
+    }, function(){});
+    setTimeout(sweepDeadlines, 4000);
+    setInterval(sweepDeadlines, 30*60*1000);
   }
 
   function boot(){
